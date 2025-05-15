@@ -11,7 +11,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, nodeCategories, onNodeAdd }) => {
   return (
     <div 
-      className={`fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] bg-background border-r border-border 
+      className={`fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] bg-background border-r border-border overflow-y-auto
       transition-transform duration-300 z-10 transform ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
     >
       <div className="p-4">

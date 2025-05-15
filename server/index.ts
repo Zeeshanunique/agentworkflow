@@ -6,6 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import pgSession from "connect-pg-simple";
 import MemoryStore from "memorystore";
+import cors from "cors";
 import config from "./config";
 import { db, runMigrations } from "./db";
 import { setupPassport } from "./middleware/auth";
@@ -48,6 +49,16 @@ const sessionMiddleware = session({
   ...config.sessionConfig
 });
 
+// Configure CORS for development
+if (config.isDev) {
+  app.use(cors({
+    origin: 'http://localhost:5173', // Vite dev server default port
+    credentials: true, // Allow cookies to be sent with requests
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
+}
+
 app.use(sessionMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -61,8 +72,53 @@ app.use(passport.session());
 app.use("/api/auth", authRoutes);
 app.use("/api/workflows", workflowsRoutes);
 
-// Static files (in production)
-if (!config.isDev) {
+// Static files handling
+if (config.isDev) {
+  // In development mode, add a simple route for the root path
+  app.get("/", (req, res) => {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Agent Workflow - Development</title>
+          <style>
+            body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+            h1 { color: #333; }
+            .container { background-color: #f9f9f9; border-radius: 5px; padding: 20px; }
+            .info { margin-bottom: 20px; }
+            code { background-color: #eee; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+            ul { margin-top: 10px; }
+            li { margin-bottom: 8px; }
+            .api-link { color: #0066cc; text-decoration: none; }
+            .api-link:hover { text-decoration: underline; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Agent Workflow API Server</h1>
+            <div class="info">
+              <p>The API server is running successfully in development mode.</p>
+              <p>Available API endpoints:</p>
+              <ul>
+                <li><a href="/api/auth" class="api-link">/api/auth</a> - Authentication endpoints</li>
+                <li><a href="/api/workflows" class="api-link">/api/workflows</a> - Workflow management endpoints</li>
+              </ul>
+            </div>
+            <div class="info">
+              <p>To run the frontend development server:</p>
+              <ol>
+                <li>Open a new terminal</li>
+                <li>Run <code>npm run dev:client</code> or add this script to your package.json</li>
+              </ol>
+              <p>Then access the frontend at: <a href="http://localhost:5173" class="api-link">http://localhost:5173</a></p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `);
+  });
+} else {
+  // In production mode, serve static files
   app.use(express.static(config.staticPath));
   
   // Serve index.html for all routes except API

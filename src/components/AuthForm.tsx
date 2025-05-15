@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'wouter';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,6 +27,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const AuthForm: React.FC = () => {
+  const [, navigate] = useLocation();
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,6 +60,7 @@ const AuthForm: React.FC = () => {
         setError(response.error);
       } else if (response.data?.user) {
         setUser(response.data.user);
+        navigate('/');
       }
     } catch (error) {
       setError('An unexpected error occurred. Please try again.');
@@ -83,6 +86,7 @@ const AuthForm: React.FC = () => {
         setError(response.error);
       } else if (response.data?.user) {
         setUser(response.data.user);
+        navigate('/');
       }
     } catch (error) {
       setError('An unexpected error occurred. Please try again.');

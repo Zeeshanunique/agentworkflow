@@ -6,7 +6,6 @@ import ReactFlow, {
   Panel,
   useNodesState,
   useEdgesState,
-  addEdge,
   Connection as ReactFlowConnection,
   Edge,
   Node as ReactFlowNode,
@@ -126,7 +125,14 @@ const Canvas: React.FC<CanvasProps> = ({
         <Controls />
         <MiniMap />
         <Panel position="bottom-right" className="bg-background border border-border rounded px-2 py-1 text-xs">
-          {selectedNodeId ? `Selected: ${selectedNodeId}` : 'No node selected'}
+          {reactFlowNodes.length === 0
+            ? 'No nodes on canvas'
+            : selectedNodeId
+              ? (() => {
+                  const selected = reactFlowNodes.find(n => n.id === selectedNodeId);
+                  return selected ? `Selected: ${selected.data.node.name ?? selected.id}` : 'No node selected';
+                })()
+              : 'No node selected'}
         </Panel>
       </ReactFlow>
     </div>
