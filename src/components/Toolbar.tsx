@@ -1,84 +1,77 @@
 import React from 'react';
-import { Save, Trash, Play, Plus, Download, Upload } from 'lucide-react';
+import { Save, Play, Plus, Users, Square } from 'lucide-react';
+import { Button } from './ui/button';
 
 interface ToolbarProps {
-  onSave: () => void;
-  onClear: () => void;
-  onRun: () => void;
-  onNew: () => void;
-  onExport: () => void;
-  onImport: () => void;
-  isRunning: boolean;
+  onSave?: () => void;
+  onRun?: () => void;
+  onStop?: () => void;
+  isRunning?: boolean;
+  isCollaborating?: boolean;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
   onSave,
-  onClear,
   onRun,
-  onNew,
-  onExport,
-  onImport,
-  isRunning
+  onStop,
+  isRunning = false,
+  isCollaborating = false
 }) => {
   return (
-    <div className="bg-white border-b border-gray-200 py-2 px-4 flex items-center gap-2">
-      <button
-        className="p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors"
-        onClick={onNew}
-        title="New Workflow"
+    <div className="bg-background border-b border-border py-2 px-4 flex items-center gap-2">
+      <Button 
+        variant="ghost"
+        size="icon"
+        title="New Workflow" 
+        className="text-muted-foreground hover:text-foreground"
       >
         <Plus size={18} />
-      </button>
+      </Button>
       
-      <button
-        className="p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors"
-        onClick={onSave}
-        title="Save Workflow"
-      >
-        <Save size={18} />
-      </button>
+      {onSave && (
+        <Button 
+          variant="ghost"
+          size="icon"
+          onClick={onSave} 
+          title="Save Workflow"
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Save size={18} />
+        </Button>
+      )}
       
-      <div className="h-5 border-r border-gray-300 mx-1"></div>
+      <div className="h-5 border-r border-border mx-1"></div>
       
-      <button
-        className="p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors"
-        onClick={onImport}
-        title="Import Workflow"
-      >
-        <Upload size={18} />
-      </button>
-      
-      <button
-        className="p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors"
-        onClick={onExport}
-        title="Export Workflow"
-      >
-        <Download size={18} />
-      </button>
-      
-      <div className="h-5 border-r border-gray-300 mx-1"></div>
-      
-      <button
-        className={`p-2 rounded-md transition-colors ${
-          isRunning 
-            ? 'text-green-600 bg-green-50' 
-            : 'text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50'
-        }`}
-        onClick={onRun}
-        title="Run Workflow"
-      >
-        <Play size={18} />
-      </button>
+      {isRunning ? (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onStop}
+          title="Stop Execution"
+          className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+        >
+          <Square size={18} />
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onRun}
+          title="Run Workflow"
+          className="text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+        >
+          <Play size={18} />
+        </Button>
+      )}
       
       <div className="flex-grow"></div>
       
-      <button
-        className="p-2 rounded-md text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
-        onClick={onClear}
-        title="Clear Workflow"
-      >
-        <Trash size={18} />
-      </button>
+      {isCollaborating && (
+        <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+          <Users size={16} />
+          <span className="text-xs font-medium">Collaborating</span>
+        </div>
+      )}
     </div>
   );
 };
