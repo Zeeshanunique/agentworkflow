@@ -1,3 +1,10 @@
+// Define icon types for nodes
+export type NodeIconType = 
+  | 'key' | 'brain' | 'image' | 'share' | 'file-text' 
+  | 'messageSquare' | 'mail' | 'globe' | 'webhook' | 'database'
+  | 'send' | 'gauge' | 'bot' | 'chevronRight' | 'filter'
+  | 'barChart' | 'users' | 'messageCircle' | 'calendar' | 'target' | 'megaphone';
+
 export interface Position {
   x: number;
   y: number;
@@ -14,7 +21,7 @@ export interface NodeType {
   name: string;
   description: string;
   category: string;
-  icon: React.ReactNode;
+  icon: NodeIconType;
   colorClass: string;
   inputs: Port[];
   outputs: Port[];
@@ -47,7 +54,7 @@ export interface NodeCategory {
     type: string;
     name: string;
     description: string;
-    icon: React.ReactNode;
+    icon: NodeIconType;
     colorClass: string;
   }[];
 }

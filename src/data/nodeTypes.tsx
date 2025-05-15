@@ -1,11 +1,61 @@
-import React from 'react';
+import * as React from 'react';
 import { 
   MessageSquare, Mail, Globe, Webhook, Database, Send, 
   Gauge, Brain, Bot, ChevronRight, Filter, BarChartBig, 
   Users, MessageCircle, Key, Image, Share2, FileText, 
   Calendar, Target, Megaphone
 } from 'lucide-react';
-import { NodeType } from '../types';
+import { NodeType, NodeIconType } from '../types';
+
+// Utility function to render icon based on type
+export const renderIcon = (type: NodeIconType): React.ReactNode => {
+  switch (type) {
+    case 'key':
+      return <Key size={16} color="white" />;
+    case 'brain':
+      return <Brain size={16} color="white" />;
+    case 'image':
+      return <Image size={16} color="white" />;
+    case 'share':
+      return <Share2 size={16} color="white" />;
+    case 'file-text':
+      return <FileText size={16} color="white" />;
+    case 'messageSquare':
+      return <MessageSquare size={16} color="white" />;
+    case 'mail':
+      return <Mail size={16} color="white" />;
+    case 'globe':
+      return <Globe size={16} color="white" />;
+    case 'webhook':
+      return <Webhook size={16} color="white" />;
+    case 'database':
+      return <Database size={16} color="white" />;
+    case 'send':
+      return <Send size={16} color="white" />;
+    case 'gauge':
+      return <Gauge size={16} color="white" />;
+    case 'bot':
+      return <Bot size={16} color="white" />;
+    case 'chevronRight':
+      return <ChevronRight size={16} color="white" />;
+    case 'filter':
+      return <Filter size={16} color="white" />;
+    case 'barChart':
+      return <BarChartBig size={16} color="white" />;
+    case 'users':
+      return <Users size={16} color="white" />;
+    case 'messageCircle':
+      return <MessageCircle size={16} color="white" />;
+    case 'calendar':
+      return <Calendar size={16} color="white" />;
+    case 'target':
+      return <Target size={16} color="white" />;
+    case 'megaphone':
+      return <Megaphone size={16} color="white" />;
+    default:
+      return null;
+  }
+};
 
 export const nodeTypes: NodeType[] = [
   {
@@ -13,7 +63,7 @@ export const nodeTypes: NodeType[] = [
     name: 'OpenAI API Key',
     description: 'Configure your OpenAI API key',
     category: 'configuration',
-    icon: <Key size={16} color="white" />,
+    icon: 'key',
     colorClass: 'bg-gray-600',
     inputs: [],
     outputs: [
@@ -28,7 +78,7 @@ export const nodeTypes: NodeType[] = [
     name: 'AI Message',
     description: 'Generate AI responses based on prompts',
     category: 'ai',
-    icon: <Brain size={16} color="white" />,
+    icon: 'brain',
     colorClass: 'bg-purple-600',
     inputs: [
       { id: 'prompt', name: 'Prompt', type: 'string' },
@@ -48,7 +98,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Image Generator',
     description: 'Generate images using DALL-E',
     category: 'ai',
-    icon: <Image size={16} color="white" />,
+    icon: 'image',
     colorClass: 'bg-purple-600',
     inputs: [
       { id: 'prompt', name: 'Prompt', type: 'string' }
@@ -67,7 +117,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Social Media Post',
     description: 'Create and schedule social media posts',
     category: 'marketing',
-    icon: <Share2 size={16} color="white" />,
+    icon: 'share',
     colorClass: 'bg-blue-600',
     inputs: [
       { id: 'content', name: 'Content', type: 'string' },
@@ -86,7 +136,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Content Generator',
     description: 'Generate marketing content',
     category: 'marketing',
-    icon: <FileText size={16} color="white" />,
+    icon: 'file-text',
     colorClass: 'bg-blue-600',
     inputs: [
       { id: 'topic', name: 'Topic', type: 'string' },
@@ -105,7 +155,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Campaign Scheduler',
     description: 'Schedule marketing campaigns',
     category: 'marketing',
-    icon: <Calendar size={16} color="white" />,
+    icon: 'calendar',
     colorClass: 'bg-blue-600',
     inputs: [
       { id: 'campaign', name: 'Campaign', type: 'object' }
@@ -123,7 +173,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Ad Generator',
     description: 'Generate ad copy and creatives',
     category: 'marketing',
-    icon: <Target size={16} color="white" />,
+    icon: 'target',
     colorClass: 'bg-blue-600',
     inputs: [
       { id: 'product', name: 'Product', type: 'string' },
@@ -142,7 +192,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Marketing Analytics',
     description: 'Track campaign performance',
     category: 'marketing',
-    icon: <Megaphone size={16} color="white" />,
+    icon: 'megaphone',
     colorClass: 'bg-blue-600',
     inputs: [
       { id: 'campaign_id', name: 'Campaign ID', type: 'string' }
@@ -160,7 +210,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Email Sender',
     description: 'Send personalized emails to prospects',
     category: 'communication',
-    icon: <Mail size={16} color="white" />,
+    icon: 'mail',
     colorClass: 'bg-blue-600',
     inputs: [
       { id: 'recipient', name: 'Recipient', type: 'string' },
@@ -182,7 +232,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Data Source',
     description: 'Fetch data from external sources',
     category: 'data',
-    icon: <Database size={16} color="white" />,
+    icon: 'database',
     colorClass: 'bg-emerald-600',
     inputs: [],
     outputs: [
@@ -199,7 +249,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Conditional',
     description: 'Branching logic based on conditions',
     category: 'logic',
-    icon: <ChevronRight size={16} color="white" />,
+    icon: 'chevronRight',
     colorClass: 'bg-orange-600',
     inputs: [
       { id: 'condition', name: 'Condition', type: 'boolean' }
@@ -214,7 +264,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Filter',
     description: 'Filter data based on criteria',
     category: 'data',
-    icon: <Filter size={16} color="white" />,
+    icon: 'filter',
     colorClass: 'bg-emerald-600',
     inputs: [
       { id: 'data', name: 'Data', type: 'array' }
@@ -233,7 +283,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Webhook',
     description: 'Receive data from external services',
     category: 'integrations',
-    icon: <Webhook size={16} color="white" />,
+    icon: 'webhook',
     colorClass: 'bg-indigo-600',
     inputs: [],
     outputs: [
@@ -249,7 +299,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Analytics',
     description: 'Track and analyze metrics',
     category: 'data',
-    icon: <Gauge size={16} color="white" />,
+    icon: 'gauge',
     colorClass: 'bg-emerald-600',
     inputs: [
       { id: 'event', name: 'Event', type: 'string' },
@@ -266,7 +316,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Chat Bot',
     description: 'Interactive chat interface for websites',
     category: 'ai',
-    icon: <Bot size={16} color="white" />,
+    icon: 'bot',
     colorClass: 'bg-purple-600',
     inputs: [
       { id: 'message', name: 'Message', type: 'string' }
@@ -285,7 +335,7 @@ export const nodeTypes: NodeType[] = [
     name: 'Lead Scoring',
     description: 'Score leads based on criteria',
     category: 'sales',
-    icon: <BarChartBig size={16} color="white" />,
+    icon: 'barChart',
     colorClass: 'bg-amber-600',
     inputs: [
       { id: 'lead', name: 'Lead', type: 'object' }
@@ -304,7 +354,7 @@ export const nodeTypes: NodeType[] = [
     name: 'CRM Integration',
     description: 'Sync data with your CRM',
     category: 'integrations',
-    icon: <Users size={16} color="white" />,
+    icon: 'users',
     colorClass: 'bg-indigo-600',
     inputs: [
       { id: 'data', name: 'Data', type: 'object' }
@@ -323,7 +373,7 @@ export const nodeTypes: NodeType[] = [
     name: 'SMS Sender',
     description: 'Send SMS messages to customers',
     category: 'communication',
-    icon: <MessageCircle size={16} color="white" />,
+    icon: 'messageCircle',
     colorClass: 'bg-blue-600',
     inputs: [
       { id: 'recipient', name: 'Recipient', type: 'string' },
@@ -343,7 +393,7 @@ export const nodeTypes: NodeType[] = [
     name: 'API Request',
     description: 'Make HTTP requests to external APIs',
     category: 'integrations',
-    icon: <Globe size={16} color="white" />,
+    icon: 'globe',
     colorClass: 'bg-indigo-600',
     inputs: [
       { id: 'url', name: 'URL', type: 'string' },

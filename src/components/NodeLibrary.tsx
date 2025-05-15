@@ -1,6 +1,7 @@
-// filepath: /workspaces/agentworkflow/src/components/NodeLibrary.tsx
 import React, { useState } from 'react';
 import { NodeCategory } from '../types';
+import { renderIcon } from '../data/nodeTypes';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface NodeLibraryProps {
   categories: NodeCategory[];
@@ -23,27 +24,29 @@ const NodeLibrary: React.FC<NodeLibraryProps> = ({ categories, onNodeAdd }) => {
   return (
     <div className="space-y-4">
       {categories.map((category) => (
-        <div key={category.id} className="border border-border rounded-md overflow-hidden">
+        <div key={category.id} className="border border-border rounded-lg overflow-hidden shadow-sm">
           <button
-            className="w-full p-2 bg-muted/50 text-left flex justify-between items-center cursor-pointer hover:bg-muted"
+            className="w-full p-3 bg-muted/40 text-left flex justify-between items-center cursor-pointer hover:bg-muted/70 transition-colors duration-200"
             onClick={() => toggleCategory(category.id)}
           >
             <span className="font-medium">{category.name}</span>
-            <span className="text-xs">
-              {expandedCategories.includes(category.id) ? '▼' : '►'}
+            <span>
+              {expandedCategories.includes(category.id) ? 
+                <ChevronDown className="h-4 w-4" /> : 
+                <ChevronRight className="h-4 w-4" />}
             </span>
           </button>
           
           {expandedCategories.includes(category.id) && (
-            <div className="p-2 space-y-1">
+            <div className="px-3 py-2 space-y-1.5 bg-background/80">
               {category.nodes.map((node) => (
                 <button
                   key={node.type}
-                  className="w-full p-2 text-left flex items-center gap-2 rounded hover:bg-accent cursor-pointer"
+                  className="w-full p-2.5 text-left flex items-center gap-3 rounded-md hover:bg-accent/90 cursor-pointer transition-all duration-200 hover:shadow-sm"
                   onClick={() => onNodeAdd(node.type)}
                 >
-                  <span className={`p-1 rounded ${node.colorClass}`}>
-                    {node.icon}
+                  <span className={`p-1.5 rounded ${node.colorClass} flex items-center justify-center`}>
+                    {renderIcon(node.icon)}
                   </span>
                   <div className="flex-1">
                     <span className="block text-sm font-medium">{node.name}</span>

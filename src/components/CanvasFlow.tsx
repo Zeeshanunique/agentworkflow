@@ -15,6 +15,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import { Node, Connection, Position } from '../types';
 import CustomNode from './CustomNode';
+import { NodeStatusType } from './NodeStatus';
 
 interface CanvasProps {
   nodes: Node[];
@@ -22,7 +23,9 @@ interface CanvasProps {
   onNodeSelect: (nodeId: string | null) => void;
   onNodeMove: (nodeId: string, position: Position) => void;
   onNodeConnect: (fromNodeId: string, fromPortId: string, toNodeId: string, toPortId: string) => void;
+  onNodeParametersChange: (nodeId: string, parameters: Record<string, string>) => void;
   selectedNodeId: string | null;
+  nodeStatuses?: Record<string, { status: NodeStatusType; message?: string }>;
 }
 
 // Define node types
@@ -36,18 +39,31 @@ const Canvas: React.FC<CanvasProps> = ({
   onNodeSelect,
   onNodeMove,
   onNodeConnect,
+  onNodeParametersChange,
   selectedNodeId,
+  nodeStatuses = {},
 }) => {
   // Convert our nodes to ReactFlow nodes
   const initialNodes: ReactFlowNode[] = useMemo(() => {
-    return nodes.map((node) => ({
-      id: node.id,
-      type: 'customNode',
-      position: node.position,
-      data: { node },
-      selected: node.id === selectedNodeId,
-    }));
-  }, [nodes, selectedNodeId]);
+    return nodes.map((node) => {
+      const nodeStatus = nodeStatuses[node.id] || { status: 'idle' };
+      
+      return {
+        id: node.id,
+        type: 'customNode',
+        position: node.position,
+        data: { 
+          node, 
+          onParametersChange: (nodeId: string, parameters: Record<string, string>) => {
+            onNodeParametersChange(nodeId, parameters);
+          },
+          status: nodeStatus.status,
+          statusMessage: nodeStatus.message
+        },
+        selected: node.id === selectedNodeId,
+      };
+    });
+  }, [nodes, selectedNodeId, nodeStatuses, onNodeParametersChange]);
 
   // Convert our connections to ReactFlow edges
   const initialEdges: Edge[] = useMemo(() => {

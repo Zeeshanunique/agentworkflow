@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 import type { Node, Connection, Position } from '../types';
 import { getNodeTypeByType } from '../data/nodeTypes';
 import { v4 as uuidv4 } from 'uuid';
+import { NodeStatusType } from '../components/NodeStatus';
 
 interface WorkflowState {
   // Workflow data
@@ -19,6 +20,9 @@ interface WorkflowState {
   isRunning: boolean;
   isSaving: boolean;
   lastSaved: Date | null;
+  
+  // Node execution state
+  nodeStatuses: Record<string, { status: NodeStatusType; message?: string }>;
   
   // Authentication state
   user: {
@@ -52,6 +56,9 @@ interface WorkflowState {
   startRunning: () => void;
   stopRunning: () => void;
   
+  setNodeStatus: (nodeId: string, status: NodeStatusType, message?: string) => void;
+  resetNodeStatuses: () => void;
+  
   updateWorkflowMeta: (data: { name?: string; description?: string; isPublic?: boolean }) => void;
   newWorkflow: () => void;
 }
@@ -71,6 +78,7 @@ export const useWorkflowStore = create<WorkflowState>()(
       isRunning: false,
       isSaving: false,
       lastSaved: null,
+      nodeStatuses: {},
       
       user: null,
       isAuthenticated: false,
@@ -180,6 +188,14 @@ export const useWorkflowStore = create<WorkflowState>()(
       
       stopRunning: () => set((state) => {
         state.isRunning = false;
+      }),
+      
+      setNodeStatus: (nodeId, status, message) => set((state) => {
+        state.nodeStatuses[nodeId] = { status, message };
+      }),
+      
+      resetNodeStatuses: () => set((state) => {
+        state.nodeStatuses = {};
       }),
       
       updateWorkflowMeta: (data) => set((state) => {
