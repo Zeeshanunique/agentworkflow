@@ -4,9 +4,19 @@ import dotenv from "dotenv";
 // Load environment variables
 dotenv.config();
 
-const uri = process.env.NEO4J_URI || "";
-const username = process.env.NEO4J_USERNAME || "";
-const password = process.env.NEO4J_PASSWORD || "";
+// Helper to get environment variables that works in both browser and Node.js
+const getEnv = (key: string, defaultValue: string = ""): string => {
+  // Browser environment (Vite)
+  if (typeof window !== 'undefined') {
+    return (import.meta.env?.[`VITE_${key}`] as string) || defaultValue;
+  }
+  // Node.js environment
+  return process.env?.[key] || defaultValue;
+};
+
+const uri = getEnv("NEO4J_URI");
+const username = getEnv("NEO4J_USERNAME");
+const password = getEnv("NEO4J_PASSWORD");
 
 // Validate required environment variables
 if (!uri || !username || !password) {
