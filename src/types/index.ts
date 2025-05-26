@@ -47,13 +47,17 @@ export interface NodeType {
 
 export interface Node {
   id: string;
-  name: string;
-  description: string;
+  type: string;
   position: Position;
-  nodeType: NodeType;
-  inputs: Port[];
-  outputs: Port[];
-  parameters?: Record<string, string>;
+  parameters?: Record<string, any>;
+  data?: {
+    name?: string;
+    description?: string;
+    nodeType?: NodeType;
+    inputs?: Port[];
+    outputs?: Port[];
+    parameters?: Record<string, any>;
+  };
 }
 
 export interface Connection {
@@ -84,4 +88,73 @@ export interface Workflow {
   connections: Connection[];
   createdAt: string;
   updatedAt: string;
+  userId?: string;
+  isPublic?: boolean;
+}
+
+// Neo4j specific types
+export interface Neo4jWorkflow {
+  id: string;
+  name: string;
+  description: string;
+  userId: string;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Neo4jNode {
+  id: string;
+  type: string;
+  parameters: Record<string, any>;
+  position: Position;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface Neo4jConnection {
+  id: string;
+  fromNodeId: string;
+  toNodeId: string;
+  fromPortId: string;
+  toPortId: string;
+  createdAt: string;
+}
+
+export interface WorkflowStructure {
+  nodes: Neo4jNode[];
+  connections: Neo4jConnection[];
+}
+
+// LangGraph types
+export interface LangGraphState {
+  messages: any[];
+  currentNodeId: string | null;
+  executedNodes: string[];
+  nodeOutputs: Record<string, any>;
+  error?: string;
+}
+
+export interface WorkflowExecutionResult {
+  success: boolean;
+  result: LangGraphState | null;
+  error: string | null;
+}
+
+export interface LangSmithRun {
+  id: string;
+  name: string;
+  run_type: string;
+  start_time: string;
+  end_time: string;
+  error?: string;
+  inputs: Record<string, any>;
+  outputs?: Record<string, any>;
+  trace_id: string;
+  dotted_order: number;
+  status: "success" | "error" | "in_progress" | "cancelled";
+  parent_run_id?: string;
+  execution_order: number;
+  serialized: Record<string, any>;
+  extra: Record<string, any>;
 }
