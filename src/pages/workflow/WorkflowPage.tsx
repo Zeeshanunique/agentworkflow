@@ -5,7 +5,6 @@ import { executeWorkflow } from "../../utils/workflowExecutor";
 import { MainLayout } from "../../components/layout";
 import Toolbar from "../../components/Toolbar";
 import CanvasFlow from "../../components/CanvasFlow";
-import { nodeCategories } from "../../data/nodeTypes";
 
 interface WorkflowPageProps {
   username?: string;
@@ -14,7 +13,6 @@ interface WorkflowPageProps {
 export default function WorkflowPage({
   username,
 }: WorkflowPageProps) {
-  const [sidebarOpen] = useState(true);
   const { toast } = useToast();
   const [isRunning, setIsRunning] = useState(false);
 
@@ -32,17 +30,6 @@ export default function WorkflowPage({
   const resetNodeStatuses = useWorkflowStore(
     (state) => state.resetNodeStatuses,
   );
-
-  // Add node from sidebar
-  const handleAddNode = (nodeType: string) => {
-    // Place new node at a default position (center-ish)
-    const position = {
-      x: 400 + Math.random() * 100,
-      y: 200 + Math.random() * 100,
-    };
-    addNode(nodeType, position);
-    toast({ title: "Node added", description: `Added ${nodeType} node` });
-  };
 
   // Handle node parameter changes
   const handleNodeParametersChange = (
