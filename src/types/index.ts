@@ -1,9 +1,26 @@
 // Define icon types for nodes
-export type NodeIconType = 
-  | 'key' | 'brain' | 'image' | 'share' | 'file-text' 
-  | 'messageSquare' | 'mail' | 'globe' | 'webhook' | 'database'
-  | 'send' | 'gauge' | 'bot' | 'chevronRight' | 'filter'
-  | 'barChart' | 'users' | 'messageCircle' | 'calendar' | 'target' | 'megaphone';
+export type NodeIconType =
+  | "key"
+  | "brain"
+  | "image"
+  | "share"
+  | "file-text"
+  | "messageSquare"
+  | "mail"
+  | "globe"
+  | "webhook"
+  | "database"
+  | "send"
+  | "gauge"
+  | "bot"
+  | "chevronRight"
+  | "filter"
+  | "barChart"
+  | "users"
+  | "messageCircle"
+  | "calendar"
+  | "target"
+  | "megaphone";
 
 export interface Position {
   x: number;

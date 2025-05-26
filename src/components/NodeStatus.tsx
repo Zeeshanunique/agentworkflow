@@ -1,7 +1,7 @@
-import React from 'react';
-import { Check, XCircle, Clock } from 'lucide-react';
+import React from "react";
+import { Check, XCircle, Clock } from "lucide-react";
 
-export type NodeStatusType = 'success' | 'error' | 'running' | 'idle';
+export type NodeStatusType = "success" | "error" | "running" | "idle";
 
 interface NodeStatusProps {
   status: NodeStatusType;
@@ -11,20 +11,20 @@ interface NodeStatusProps {
 const NodeStatus: React.FC<NodeStatusProps> = ({ status, message }) => {
   const renderIcon = () => {
     switch (status) {
-      case 'success':
+      case "success":
         return <Check size={14} className="text-green-500" />;
-      case 'error':
+      case "error":
         return <XCircle size={14} className="text-red-500" />;
-      case 'running':
+      case "running":
         return <Clock size={14} className="text-blue-500 animate-pulse" />;
-      case 'idle':
+      case "idle":
       default:
         return null;
     }
   };
 
   return (
-    <div 
+    <div
       className="absolute right-2 top-2 flex items-center rounded-md"
       title={message || status}
     >

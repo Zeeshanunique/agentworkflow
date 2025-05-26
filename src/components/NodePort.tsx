@@ -1,9 +1,9 @@
-import React from 'react';
+import React from "react";
 
 interface NodePortProps {
   nodeId: string;
   portId: string;
-  type: 'input' | 'output';
+  type: "input" | "output";
   onDragStart: (nodeId: string, portId: string) => void;
   onDragEnd: (toNodeId: string, toPortId: string) => void;
 }
@@ -13,10 +13,10 @@ const NodePort: React.FC<NodePortProps> = ({
   portId,
   type,
   onDragStart,
-  onDragEnd
+  onDragEnd,
 }) => {
-  const isInput = type === 'input';
-  
+  const isInput = type === "input";
+
   const handleMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isInput) {
@@ -33,9 +33,9 @@ const NodePort: React.FC<NodePortProps> = ({
   const handleDrop = (e: React.DragEvent) => {
     if (isInput) {
       e.preventDefault();
-      const fromNodeId = e.dataTransfer.getData('fromNodeId');
-      const fromPortId = e.dataTransfer.getData('fromPortId');
-      
+      const fromNodeId = e.dataTransfer.getData("fromNodeId");
+      const fromPortId = e.dataTransfer.getData("fromPortId");
+
       if (fromNodeId && fromPortId) {
         onDragEnd(nodeId, portId);
       }
@@ -51,8 +51,8 @@ const NodePort: React.FC<NodePortProps> = ({
       draggable={!isInput}
       onDragStart={(e) => {
         if (!isInput) {
-          e.dataTransfer.setData('fromNodeId', nodeId);
-          e.dataTransfer.setData('fromPortId', portId);
+          e.dataTransfer.setData("fromNodeId", nodeId);
+          e.dataTransfer.setData("fromPortId", portId);
         }
       }}
     />

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { useWorkflowStore } from '../hooks/useWorkflowStore';
+import { useEffect, useRef, useState } from "react";
+import { useWorkflowStore } from "../hooks/useWorkflowStore";
 
 // Define message types
 interface WebSocketMessage {
@@ -20,7 +20,7 @@ export function useWebSocketConnection(workflowId: string | null) {
     deleteNode,
     moveNode,
     addConnection,
-    deleteConnection
+    deleteConnection,
   } = useWorkflowStore();
 
   useEffect(() => {
@@ -36,14 +36,14 @@ export function useWebSocketConnection(workflowId: string | null) {
     }
 
     // Create WebSocket connection
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
-    
+
     const socket = new WebSocket(wsUrl);
     socketRef.current = socket;
 
     socket.onopen = () => {
-      console.log('WebSocket connected');
+      console.log("WebSocket connected");
     };
 
     socket.onmessage = (event) => {
@@ -51,18 +51,18 @@ export function useWebSocketConnection(workflowId: string | null) {
         const message: WebSocketMessage = JSON.parse(event.data);
         handleMessage(message);
       } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+        console.error("Error parsing WebSocket message:", error);
       }
     };
 
     socket.onclose = () => {
-      console.log('WebSocket disconnected');
+      console.log("WebSocket disconnected");
       setIsConnected(false);
       setClientId(null);
     };
 
     socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.error("WebSocket error:", error);
     };
 
     return () => {
@@ -74,70 +74,74 @@ export function useWebSocketConnection(workflowId: string | null) {
   // Handle incoming WebSocket messages
   const handleMessage = (message: WebSocketMessage) => {
     switch (message.type) {
-      case 'CONNECTED':
+      case "CONNECTED":
         setClientId(message.clientId);
         setIsConnected(true);
-        
+
         // Join workflow room if we have a workflow ID
         if (workflowId && socketRef.current?.readyState === WebSocket.OPEN) {
-          socketRef.current.send(JSON.stringify({
-            type: 'JOIN_WORKFLOW',
-            workflowId
-          }));
+          socketRef.current.send(
+            JSON.stringify({
+              type: "JOIN_WORKFLOW",
+              workflowId,
+            }),
+          );
         }
         break;
-        
-      case 'JOINED_WORKFLOW':
+
+      case "JOINED_WORKFLOW":
         console.log(`Joined workflow room for: ${message.workflowId}`);
         console.log(`${message.clientCount} clients in room`);
         break;
-        
-      case 'CLIENT_JOINED':
+
+      case "CLIENT_JOINED":
         console.log(`Client joined: ${message.clientId}`);
         setActiveUsers((users) => [...users, message.clientId]);
         break;
-        
-      case 'CLIENT_LEFT':
+
+      case "CLIENT_LEFT":
         console.log(`Client left: ${message.clientId}`);
-        setActiveUsers((users) => users.filter(id => id !== message.clientId));
+        setActiveUsers((users) =>
+          users.filter((id) => id !== message.clientId),
+        );
         break;
-        
-      case 'UPDATE_NODE':
+
+      case "UPDATE_NODE":
         if (message.senderId !== clientId) {
           updateNode(message.nodeId, message.updates);
         }
         break;
-        
-      case 'ADD_NODE':
+
+      case "ADD_NODE":
         if (message.senderId !== clientId) {
           addNode(message.nodeType, message.position);
         }
         break;
-        
-      case 'DELETE_NODE':
+
+      case "DELETE_NODE":
         if (message.senderId !== clientId) {
           deleteNode(message.nodeId);
         }
         break;
-        
-      case 'MOVE_NODE':
+
+      case "MOVE_NODE":
         if (message.senderId !== clientId) {
           moveNode(message.nodeId, message.position);
         }
         break;
-        
-      case 'ADD_CONNECTION':
+
+      case "ADD_CONNECTION":
         if (message.senderId !== clientId) {
           addConnection(
             message.fromNodeId,
             message.fromPortId,
             message.toNodeId,
-            message.toPortId
+            message.toPortId,
           );
         }
         break;
-        
-      case 'DELETE_CONNECTION':
+
+      case "DELETE_CONNECTION":
         if (message.senderId !== clientId) {
           deleteConnection(message.connectionId);
         }
@@ -150,7 +154,7 @@ export function useWebSocketConnection(workflowId: string | null) {
     if (socketRef.current?.readyState === WebSocket.OPEN) {
       socketRef.current.send(JSON.stringify(message));
     } else {
-      console.error('WebSocket is not connected');
+      console.error("WebSocket is not connected");
     }
   };
 
@@ -158,64 +162,75 @@ export function useWebSocketConnection(workflowId: string | null) {
   const sendNodeUpdate = (nodeId: string, updates: any) => {
     if (isConnected) {
       sendMessage({
-        type: 'UPDATE_NODE',
+        type: "UPDATE_NODE",
         nodeId,
-        updates
+        updates,
       });
     }
   };
-  
+
   // Utility to notify when a node is added
-  const sendNodeAdded = (nodeType: string, position: { x: number, y: number }) => {
+  const sendNodeAdded = (
+    nodeType: string,
+    position: { x: number; y: number },
+  ) => {
     if (isConnected) {
       sendMessage({
-        type: 'ADD_NODE',
+        type: "ADD_NODE",
         nodeType,
-        position
+        position,
       });
     }
   };
-  
+
   // Utility to notify when a node is deleted
   const sendNodeDeleted = (nodeId: string) => {
     if (isConnected) {
       sendMessage({
-        type: 'DELETE_NODE',
-        nodeId
-      });
-    }
-  };
-  
-  // Utility to notify when a node is moved
-  const sendNodeMoved = (nodeId: string, position: { x: number, y: number }) => {
-    if (isConnected) {
-      sendMessage({
-        type: 'MOVE_NODE',
+        type: "DELETE_NODE",
         nodeId,
-        position
       });
     }
   };
-  
-  // Utility to notify when a connection is added
-  const sendConnectionAdded = (fromNodeId: string, fromPortId: string, toNodeId: string, toPortId: string) => {
+
+  // Utility to notify when a node is moved
+  const sendNodeMoved = (
+    nodeId: string,
+    position: { x: number; y: number },
+  ) => {
     if (isConnected) {
       sendMessage({
-        type: 'ADD_CONNECTION',
+        type: "MOVE_NODE",
+        nodeId,
+        position,
+      });
+    }
+  };
+
+  // Utility to notify when a connection is added
+  const sendConnectionAdded = (
+    fromNodeId: string,
+    fromPortId: string,
+    toNodeId: string,
+    toPortId: string,
+  ) => {
+    if (isConnected) {
+      sendMessage({
+        type: "ADD_CONNECTION",
         fromNodeId,
         fromPortId,
         toNodeId,
-        toPortId
+        toPortId,
       });
     }
   };
-  
+
   // Utility to notify when a connection is deleted
   const sendConnectionDeleted = (connectionId: string) => {
     if (isConnected) {
       sendMessage({
-        type: 'DELETE_CONNECTION',
-        connectionId
+        type: "DELETE_CONNECTION",
+        connectionId,
       });
     }
   };
@@ -230,6 +245,6 @@ export function useWebSocketConnection(workflowId: string | null) {
     sendNodeDeleted,
     sendNodeMoved,
     sendConnectionAdded,
-    sendConnectionDeleted
+    sendConnectionDeleted,
   };
 }

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from "react";
 import {
   Toast,
   ToastProvider,
@@ -6,9 +6,9 @@ import {
   ToastTitle,
   ToastDescription,
   ToastClose,
-} from './ui/toast';
+} from "./ui/toast";
 
-type ToastType = 'default' | 'success' | 'error' | 'warning' | 'info';
+type ToastType = "default" | "success" | "error" | "warning" | "info";
 
 interface ToastContextProps {
   toast: (options: {
@@ -25,7 +25,7 @@ export function useToast() {
   const context = useContext(ToastContext);
 
   if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
+    throw new Error("useToast must be used within a ToastProvider");
   }
 
   return context;
@@ -47,7 +47,7 @@ export const ToastContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const toast = ({
     title,
     description,
-    type = 'default',
+    type = "default",
     duration = 5000,
   }: {
     title?: string;
@@ -56,7 +56,7 @@ export const ToastContextProvider: React.FC<{ children: React.ReactNode }> = ({
     duration?: number;
   }) => {
     const id = Math.random().toString(36).substring(2, 9);
-    
+
     setToasts((prevToasts) => [
       ...prevToasts,
       { id, title, description, type, duration },
@@ -74,10 +74,10 @@ export const ToastContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const getVariant = (type: ToastType) => {
     switch (type) {
-      case 'error':
-        return 'destructive';
+      case "error":
+        return "destructive";
       default:
-        return 'default';
+        return "default";
     }
   };
 
@@ -90,15 +90,15 @@ export const ToastContextProvider: React.FC<{ children: React.ReactNode }> = ({
             key={toast.id}
             variant={getVariant(toast.type)}
             className={
-              toast.type === 'success'
-                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                : toast.type === 'error'
-                ? 'border-destructive bg-destructive/10'
-                : toast.type === 'warning'
-                ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
-                : toast.type === 'info'
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                : ''
+              toast.type === "success"
+                ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                : toast.type === "error"
+                  ? "border-destructive bg-destructive/10"
+                  : toast.type === "warning"
+                    ? "border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20"
+                    : toast.type === "info"
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                      : ""
             }
           >
             <div className="flex flex-col gap-1">

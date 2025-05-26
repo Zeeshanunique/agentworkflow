@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from "react";
 import ReactFlow, {
   Background,
   Controls,
@@ -11,19 +11,27 @@ import ReactFlow, {
   Node as ReactFlowNode,
   ConnectionLineType,
   NodeMouseHandler,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
-import { Node, Connection, Position } from '../types';
-import CustomNode from './CustomNode';
-import { NodeStatusType } from './NodeStatus';
+} from "reactflow";
+import "reactflow/dist/style.css";
+import { Node, Connection, Position } from "../types";
+import CustomNode from "./CustomNode";
+import { NodeStatusType } from "./NodeStatus";
 
 interface CanvasProps {
   nodes: Node[];
   connections: Connection[];
   onNodeSelect: (nodeId: string | null) => void;
   onNodeMove: (nodeId: string, position: Position) => void;
-  onNodeConnect: (fromNodeId: string, fromPortId: string, toNodeId: string, toPortId: string) => void;
-  onNodeParametersChange: (nodeId: string, parameters: Record<string, string>) => void;
+  onNodeConnect: (
+    fromNodeId: string,
+    fromPortId: string,
+    toNodeId: string,
+    toPortId: string,
+  ) => void;
+  onNodeParametersChange: (
+    nodeId: string,
+    parameters: Record<string, string>,
+  ) => void;
   selectedNodeId: string | null;
   nodeStatuses?: Record<string, { status: NodeStatusType; message?: string }>;
 }
@@ -46,19 +54,22 @@ const Canvas: React.FC<CanvasProps> = ({
   // Convert our nodes to ReactFlow nodes
   const initialNodes: ReactFlowNode[] = useMemo(() => {
     return nodes.map((node) => {
-      const nodeStatus = nodeStatuses[node.id] || { status: 'idle' };
-      
+      const nodeStatus = nodeStatuses[node.id] || { status: "idle" };
+
       return {
         id: node.id,
-        type: 'customNode',
+        type: "customNode",
         position: node.position,
-        data: { 
-          node, 
-          onParametersChange: (nodeId: string, parameters: Record<string, string>) => {
+        data: {
+          node,
+          onParametersChange: (
+            nodeId: string,
+            parameters: Record<string, string>,
+          ) => {
             onNodeParametersChange(nodeId, parameters);
           },
           status: nodeStatus.status,
-          statusMessage: nodeStatus.message
+          statusMessage: nodeStatus.message,
         },
         selected: node.id === selectedNodeId,
       };
@@ -73,7 +84,7 @@ const Canvas: React.FC<CanvasProps> = ({
       sourceHandle: connection.fromPortId,
       target: connection.toNodeId,
       targetHandle: connection.toPortId,
-      type: 'default',
+      type: "default",
     }));
   }, [connections]);
 
@@ -96,7 +107,7 @@ const Canvas: React.FC<CanvasProps> = ({
     (_, node) => {
       onNodeSelect(node.id);
     },
-    [onNodeSelect]
+    [onNodeSelect],
   );
 
   // Handle node movement
@@ -104,17 +115,27 @@ const Canvas: React.FC<CanvasProps> = ({
     (_, node) => {
       onNodeMove(node.id, { x: node.position.x, y: node.position.y });
     },
-    [onNodeMove]
+    [onNodeMove],
   );
 
   // Handle new connections
   const handleConnect = useCallback(
     (params: ReactFlowConnection) => {
-      if (params.source && params.target && params.sourceHandle && params.targetHandle) {
-        onNodeConnect(params.source, params.sourceHandle, params.target, params.targetHandle);
+      if (
+        params.source &&
+        params.target &&
+        params.sourceHandle &&
+        params.targetHandle
+      ) {
+        onNodeConnect(
+          params.source,
+          params.sourceHandle,
+          params.target,
+          params.targetHandle,
+        );
       }
     },
-    [onNodeConnect]
+    [onNodeConnect],
   );
 
   // Handle canvas click (deselect nodes)
@@ -140,15 +161,22 @@ const Canvas: React.FC<CanvasProps> = ({
         <Background />
         <Controls />
         <MiniMap />
-        <Panel position="bottom-right" className="bg-background border border-border rounded px-2 py-1 text-xs">
+        <Panel
+          position="bottom-right"
+          className="bg-background border border-border rounded px-2 py-1 text-xs"
+        >
           {reactFlowNodes.length === 0
-            ? 'No nodes on canvas'
+            ? "No nodes on canvas"
             : selectedNodeId
               ? (() => {
-                  const selected = reactFlowNodes.find(n => n.id === selectedNodeId);
-                  return selected ? `Selected: ${selected.data.node.name ?? selected.id}` : 'No node selected';
+                  const selected = reactFlowNodes.find(
+                    (n) => n.id === selectedNodeId,
+                  );
+                  return selected
+                    ? `Selected: ${selected.data.node.name ?? selected.id}`
+                    : "No node selected";
                 })()
-              : 'No node selected'}
+              : "No node selected"}
         </Panel>
       </ReactFlow>
     </div>

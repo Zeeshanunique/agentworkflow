@@ -1,7 +1,7 @@
-import { ReactNode, useState } from 'react';
-import Header from '../../components/Header';
-import Sidebar from '../../components/Sidebar';
-import { nodeCategories } from '../../data/nodeTypes';
+import { ReactNode, useState } from "react";
+import Header from "../../components/Header";
+import Sidebar from "../../components/Sidebar";
+import { nodeCategories } from "../../data/nodeTypes";
 
 type WorkflowLayoutProps = {
   children: ReactNode;
@@ -10,31 +10,29 @@ type WorkflowLayoutProps = {
   onNodeAdd?: (nodeType: string) => void;
 };
 
-export default function WorkflowLayout({ 
-  children, 
-  isAuthenticated, 
+export default function WorkflowLayout({
+  children,
+  isAuthenticated,
   username,
-  onNodeAdd 
+  onNodeAdd,
 }: WorkflowLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-      <Header 
-        toggleSidebar={() => setSidebarOpen(!sidebarOpen)} 
-        isAuthenticated={isAuthenticated} 
-        username={username} 
+      <Header
+        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        isAuthenticated={isAuthenticated}
+        username={username}
       />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar 
-          isOpen={sidebarOpen} 
+        <Sidebar
+          isOpen={sidebarOpen}
           nodeCategories={nodeCategories}
           onNodeAdd={onNodeAdd}
         />
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
   );
-} 
+}

@@ -1,14 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
-import NodeComponent from './NodeComponent';
-import Connections from './Connections';
-import { Node, Position, Connection } from '../types';
+import React, { useState, useRef, useEffect } from "react";
+import NodeComponent from "./NodeComponent";
+import Connections from "./Connections";
+import { Node, Position, Connection } from "../types";
 
 interface CanvasProps {
   nodes: Node[];
   connections: Connection[];
   onNodeSelect: (nodeId: string | null) => void;
   onNodeMove: (nodeId: string, position: Position) => void;
-  onNodeConnect: (fromNodeId: string, fromPortId: string, toNodeId: string, toPortId: string) => void;
+  onNodeConnect: (
+    fromNodeId: string,
+    fromPortId: string,
+    toNodeId: string,
+    toPortId: string,
+  ) => void;
   selectedNodeId: string | null;
 }
 
@@ -18,7 +23,7 @@ const Canvas: React.FC<CanvasProps> = ({
   onNodeSelect,
   onNodeMove,
   onNodeConnect,
-  selectedNodeId
+  selectedNodeId,
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -48,7 +53,7 @@ const Canvas: React.FC<CanvasProps> = ({
     if (isDragging) {
       setOffset({
         x: offset.x + (e.clientX - dragStart.x) / scale,
-        y: offset.y + (e.clientY - dragStart.y) / scale
+        y: offset.y + (e.clientY - dragStart.y) / scale,
       });
       setDragStart({ x: e.clientX, y: e.clientY });
     }
@@ -60,8 +65,8 @@ const Canvas: React.FC<CanvasProps> = ({
           ...dragConnection,
           toPosition: {
             x: (e.clientX - canvasRect.left) / scale - offset.x,
-            y: (e.clientY - canvasRect.top) / scale - offset.y
-          }
+            y: (e.clientY - canvasRect.top) / scale - offset.y,
+          },
         });
       }
     }
@@ -80,12 +85,12 @@ const Canvas: React.FC<CanvasProps> = ({
   };
 
   const handlePortDragStart = (nodeId: string, portId: string) => {
-    const node = nodes.find(n => n.id === nodeId);
+    const node = nodes.find((n) => n.id === nodeId);
     if (node) {
       setDragConnection({
         fromNodeId: nodeId,
         fromPortId: portId,
-        toPosition: { x: node.position.x, y: node.position.y }
+        toPosition: { x: node.position.x, y: node.position.y },
       });
     }
   };
@@ -96,7 +101,7 @@ const Canvas: React.FC<CanvasProps> = ({
         dragConnection.fromNodeId,
         dragConnection.fromPortId,
         toNodeId,
-        toPortId
+        toPortId,
       );
       setDragConnection(null);
     }
@@ -121,15 +126,15 @@ const Canvas: React.FC<CanvasProps> = ({
             linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
             linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px)
           `,
-          transform: `scale(${scale}) translate(${offset.x}px, ${offset.y}px)`
+          transform: `scale(${scale}) translate(${offset.x}px, ${offset.y}px)`,
         }}
       >
-        <Connections 
-          connections={connections} 
-          nodes={nodes} 
+        <Connections
+          connections={connections}
+          nodes={nodes}
           dragConnection={dragConnection}
         />
-        
+
         {nodes.map((node) => (
           <NodeComponent
             key={node.id}

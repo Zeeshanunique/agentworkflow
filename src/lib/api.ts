@@ -12,7 +12,7 @@ interface ApiResponse<T> {
 // Generic API request handler
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
   try {
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -46,7 +46,7 @@ export const authApi = {
       {
         method: "POST",
         body: JSON.stringify({ username, password }),
-      }
+      },
     );
 
     if (result.data?.user) {
@@ -56,13 +56,18 @@ export const authApi = {
     return result;
   },
 
-  register: async (username: string, email: string, password: string, confirmPassword: string) => {
+  register: async (
+    username: string,
+    email: string,
+    password: string,
+    confirmPassword: string,
+  ) => {
     const result = await apiRequest<{ user: any; message: string }>(
       "/auth/register",
       {
         method: "POST",
         body: JSON.stringify({ username, email, password, confirmPassword }),
-      }
+      },
     );
 
     if (result.data?.user) {
@@ -148,7 +153,7 @@ export const workflowApi = {
         connections: Connection[];
       };
       isPublic?: boolean;
-    }
+    },
   ) => {
     return await apiRequest<{ workflow: WorkflowData }>(`/workflows/${id}`, {
       method: "PUT",

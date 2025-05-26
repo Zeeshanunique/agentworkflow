@@ -6,22 +6,22 @@ export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
   function toggleTheme() {
-    if (theme === 'light') {
-      setTheme('dark');
+    if (theme === "light") {
+      setTheme("dark");
     } else {
-      setTheme('light');
+      setTheme("light");
     }
   }
 
   return (
-    <Button 
-      variant="ghost" 
-      size="icon" 
+    <Button
+      variant="ghost"
+      size="icon"
       aria-label="Toggle theme"
       onClick={toggleTheme}
       className="h-9 w-9 rounded-md"
     >
-      {theme === 'dark' ? (
+      {theme === "dark" ? (
         <Sun size={20} className="text-yellow-500" />
       ) : (
         <Moon size={20} className="text-blue-900" />

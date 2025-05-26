@@ -1,27 +1,29 @@
-import React, { useState } from 'react';
-import { useLocation } from 'wouter';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from './ui/button';
-import { useWorkflowStore } from '../hooks/useWorkflowStore';
-import { authApi } from '../lib/api';
+import React, { useState } from "react";
+import { useLocation } from "wouter";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "./ui/button";
+import { useWorkflowStore } from "../hooks/useWorkflowStore";
+import { authApi } from "../lib/api";
 
 // Define form schemas
 const loginSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-const registerSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  email: z.string().email('Please enter a valid email'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
+const registerSchema = z
+  .object({
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    email: z.string().email("Please enter a valid email"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -55,15 +57,15 @@ const AuthForm: React.FC = () => {
 
     try {
       const response = await authApi.login(data.username, data.password);
-      
+
       if (response.error) {
         setError(response.error);
       } else if (response.data?.user) {
         setUser(response.data.user);
-        navigate('/');
+        navigate("/");
       }
     } catch (error) {
-      setError('An unexpected error occurred. Please try again.');
+      setError("An unexpected error occurred. Please try again.");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -79,17 +81,17 @@ const AuthForm: React.FC = () => {
         data.username,
         data.email,
         data.password,
-        data.confirmPassword
+        data.confirmPassword,
       );
-      
+
       if (response.error) {
         setError(response.error);
       } else if (response.data?.user) {
         setUser(response.data.user);
-        navigate('/');
+        navigate("/");
       }
     } catch (error) {
-      setError('An unexpected error occurred. Please try again.');
+      setError("An unexpected error occurred. Please try again.");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -100,7 +102,7 @@ const AuthForm: React.FC = () => {
     <div className="w-full max-w-md p-8 space-y-8 bg-white shadow-md rounded-xl dark:bg-gray-800">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          {isLogin ? 'Sign in to your account' : 'Create a new account'}
+          {isLogin ? "Sign in to your account" : "Create a new account"}
         </h2>
       </div>
 
@@ -122,7 +124,7 @@ const AuthForm: React.FC = () => {
             <input
               id="username"
               type="text"
-              {...registerLoginForm('username')}
+              {...registerLoginForm("username")}
               className="block w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600"
             />
             {loginErrors.username && (
@@ -142,7 +144,7 @@ const AuthForm: React.FC = () => {
             <input
               id="password"
               type="password"
-              {...registerLoginForm('password')}
+              {...registerLoginForm("password")}
               className="block w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600"
             />
             {loginErrors.password && (
@@ -153,12 +155,8 @@ const AuthForm: React.FC = () => {
           </div>
 
           <div>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full"
-            >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </div>
         </form>
@@ -174,7 +172,7 @@ const AuthForm: React.FC = () => {
             <input
               id="register-username"
               type="text"
-              {...registerRegisterForm('username')}
+              {...registerRegisterForm("username")}
               className="block w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600"
             />
             {registerErrors.username && (
@@ -194,7 +192,7 @@ const AuthForm: React.FC = () => {
             <input
               id="register-email"
               type="email"
-              {...registerRegisterForm('email')}
+              {...registerRegisterForm("email")}
               className="block w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600"
             />
             {registerErrors.email && (
@@ -214,7 +212,7 @@ const AuthForm: React.FC = () => {
             <input
               id="register-password"
               type="password"
-              {...registerRegisterForm('password')}
+              {...registerRegisterForm("password")}
               className="block w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600"
             />
             {registerErrors.password && (
@@ -234,7 +232,7 @@ const AuthForm: React.FC = () => {
             <input
               id="register-confirm-password"
               type="password"
-              {...registerRegisterForm('confirmPassword')}
+              {...registerRegisterForm("confirmPassword")}
               className="block w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600"
             />
             {registerErrors.confirmPassword && (
@@ -245,12 +243,8 @@ const AuthForm: React.FC = () => {
           </div>
 
           <div>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full"
-            >
-              {isLoading ? 'Creating account...' : 'Create account'}
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? "Creating account..." : "Create account"}
             </Button>
           </div>
         </form>
@@ -264,7 +258,7 @@ const AuthForm: React.FC = () => {
         >
           {isLogin
             ? "Don't have an account? Sign up"
-            : 'Already have an account? Sign in'}
+            : "Already have an account? Sign in"}
         </button>
       </div>
     </div>

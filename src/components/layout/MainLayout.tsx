@@ -1,7 +1,7 @@
-import React, { ReactNode, useState } from 'react';
-import { Header } from './Header';
-import { Sidebar } from './Sidebar';
-import { useWorkflowStore } from '../../hooks/useWorkflowStore';
+import React, { ReactNode, useState } from "react";
+import { Header } from "./Header";
+import { Sidebar } from "./Sidebar";
+import { useWorkflowStore } from "../../hooks/useWorkflowStore";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -9,15 +9,20 @@ interface MainLayoutProps {
   isAuthenticated?: boolean;
 }
 
-export const MainLayout: React.FC<MainLayoutProps> = ({ 
-  children, 
+export const MainLayout: React.FC<MainLayoutProps> = ({
+  children,
   username,
-  isAuthenticated: propIsAuthenticated 
+  isAuthenticated: propIsAuthenticated,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   // Get authentication from store if not provided in props
-  const storeIsAuthenticated = useWorkflowStore((state) => state.isAuthenticated);
-  const isAuthenticated = propIsAuthenticated !== undefined ? propIsAuthenticated : storeIsAuthenticated;
+  const storeIsAuthenticated = useWorkflowStore(
+    (state) => state.isAuthenticated,
+  );
+  const isAuthenticated =
+    propIsAuthenticated !== undefined
+      ? propIsAuthenticated
+      : storeIsAuthenticated;
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -27,15 +32,13 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
       <Sidebar isOpen={sidebarOpen} />
       <div className="flex flex-col flex-1 overflow-hidden">
-        <Header 
-          username={username} 
+        <Header
+          username={username}
           isAuthenticated={isAuthenticated}
-          toggleSidebar={toggleSidebar} 
+          toggleSidebar={toggleSidebar}
         />
-        <main className="flex-1 overflow-y-auto p-4">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-4">{children}</main>
       </div>
     </div>
   );
-}; 
+};

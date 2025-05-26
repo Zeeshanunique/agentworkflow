@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Node, Position } from '../types';
-import NodePort from './NodePort';
-import { Trash2 } from 'lucide-react';
+import React, { useState } from "react";
+import { Node, Position } from "../types";
+import NodePort from "./NodePort";
+import { Trash2 } from "lucide-react";
 
 interface NodeComponentProps {
   node: Node;
@@ -20,7 +20,7 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
   onMove,
   onPortDragStart,
   onPortDragEnd,
-  onDelete
+  onDelete,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -31,7 +31,7 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
     setIsDragging(true);
     setDragOffset({
       x: e.clientX - node.position.x,
-      y: e.clientY - node.position.y
+      y: e.clientY - node.position.y,
     });
   };
 
@@ -39,7 +39,7 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
     if (isDragging) {
       onMove({
         x: e.clientX - dragOffset.x,
-        y: e.clientY - dragOffset.y
+        y: e.clientY - dragOffset.y,
       });
     }
   };
@@ -50,12 +50,12 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
 
   React.useEffect(() => {
     if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove as any);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener("mousemove", handleMouseMove as any);
+      window.addEventListener("mouseup", handleMouseUp);
 
       return () => {
-        window.removeEventListener('mousemove', handleMouseMove as any);
-        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener("mousemove", handleMouseMove as any);
+        window.removeEventListener("mouseup", handleMouseUp);
       };
     }
   }, [isDragging]);
@@ -66,7 +66,7 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
   return (
     <div
       className={`absolute rounded-md shadow-md transition-shadow ${
-        isSelected ? 'shadow-lg ring-2 ring-indigo-500' : ''
+        isSelected ? "shadow-lg ring-2 ring-indigo-500" : ""
       }`}
       style={{
         left: `${node.position.x}px`,
@@ -76,7 +76,9 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
       }}
       onMouseDown={handleMouseDown}
     >
-      <div className={`rounded-t-md px-3 py-2 cursor-move ${node.nodeType.colorClass} relative group`}>
+      <div
+        className={`rounded-t-md px-3 py-2 cursor-move ${node.nodeType.colorClass} relative group`}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="w-6 h-6 mr-2 flex items-center justify-center">
@@ -100,12 +102,14 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
         <div className="absolute left-0 top-0 h-full flex flex-col justify-evenly">
           {node.inputs.map((input, index) => (
             <div key={input.id} className="flex items-center -ml-3">
-              <NodePort 
+              <NodePort
                 nodeId={node.id}
                 portId={input.id}
                 type="input"
                 onDragStart={() => {}}
-                onDragEnd={(toNodeId, toPortId) => onPortDragEnd(toNodeId, toPortId)}
+                onDragEnd={(toNodeId, toPortId) =>
+                  onPortDragEnd(toNodeId, toPortId)
+                }
               />
               <span className="text-xs ml-1 text-gray-500">{input.name}</span>
             </div>
@@ -114,14 +118,17 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
 
         <div className="px-6 py-2 min-h-[60px]">
           <p className="text-xs text-gray-500">{node.description}</p>
-          {node.nodeType.type === 'openai_key' && (
+          {node.nodeType.type === "openai_key" && (
             <input
               type="password"
               className="mt-2 w-full px-2 py-1 text-sm border rounded"
               placeholder="Enter OpenAI API Key"
-              value={node.parameters?.apiKey || ''}
+              value={node.parameters?.apiKey || ""}
               onChange={(e) => {
-                node.parameters = { ...node.parameters, apiKey: e.target.value };
+                node.parameters = {
+                  ...node.parameters,
+                  apiKey: e.target.value,
+                };
               }}
             />
           )}
@@ -131,11 +138,13 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
           {node.outputs.map((output, index) => (
             <div key={output.id} className="flex items-center -mr-3">
               <span className="text-xs mr-1 text-gray-500">{output.name}</span>
-              <NodePort 
+              <NodePort
                 nodeId={node.id}
                 portId={output.id}
                 type="output"
-                onDragStart={(nodeId, portId) => onPortDragStart(nodeId, portId)}
+                onDragStart={(nodeId, portId) =>
+                  onPortDragStart(nodeId, portId)
+                }
                 onDragEnd={() => {}}
               />
             </div>
