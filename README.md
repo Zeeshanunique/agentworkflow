@@ -130,6 +130,50 @@ LangGraph enables the creation of stateful, agentic workflows using LLMs. LangSm
    LANGCHAIN_PROJECT=agentworkflow
    ```
 
+## Agent Workflow System
+
+AgentWorkflow now includes powerful LLM-powered agents for marketing and sales automation. The agent system allows you to:
+
+- Create automated marketing and sales workflows using specialized AI agents
+- Chain multiple agents together for complex tasks
+- Integrate with your existing marketing and sales tools
+
+### Marketing Agent
+
+The marketing agent specializes in generating marketing content, including:
+
+- Blog posts and articles
+- Social media content
+- Ad copy for various platforms
+- Email marketing templates
+
+### Sales Agent
+
+The sales agent focuses on sales communication and lead management:
+
+- Lead qualification and scoring
+- Sales email generation
+- Objection handling
+- Follow-up message creation
+
+### Agent Chaining
+
+You can chain multiple agents together to create complex workflows:
+
+1. A marketing agent generates content ideas
+2. Another marketing agent expands those ideas into full content
+3. A sales agent creates personalized outreach using that content
+
+## Getting Started with Agents
+
+To use the agent system in your workflows:
+
+1. Add a Marketing Agent or Sales Agent node to your workflow
+2. Configure the agent with your OpenAI API key and task description
+3. Connect inputs and outputs to other nodes in your workflow
+
+For more complex workflows, use the Agent Chain node to create sequences of agents.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

@@ -12,6 +12,8 @@ import {
 import { executeWorkflow } from "../../src/lib/langchain/workflow-engine";
 import { verifyConnection } from "../../src/lib/neo4j";
 import { getProjectRuns, getRun } from "../../src/lib/langchain/langsmith";
+import { executeAgentTask, AgentType } from "../../src/lib/agents";
+import { executeAgentChain, AgentChainConfig } from "../../src/lib/agents/agentChain";
 
 const router = Router();
 
@@ -387,6 +389,85 @@ router.get("/:id/runs/:runId", async (req, res) => {
     console.error("Error fetching workflow run:", error);
     res.status(500).json({ 
       error: "Failed to fetch workflow run",
+      details: (error as Error).message
+    });
+  }
+});
+
+// Execute a single agent task directly
+router.post("/agent-task", async (req, res) => {
+  try {
+    // Validate request body
+    const schema = z.object({
+      agentType: z.enum(["marketing", "sales"]),
+      task: z.string(),
+      apiKey: z.string(),
+    });
+
+    const validatedData = schema.parse(req.body);
+    
+    // Map string agent type to enum
+    const agentTypeEnum = validatedData.agentType === "marketing" 
+      ? AgentType.MARKETING 
+      : AgentType.SALES;
+    
+    // Execute the agent task
+    const result = await executeAgentTask(
+      agentTypeEnum,
+      validatedData.apiKey,
+      validatedData.task
+    );
+    
+    res.json(result);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const validationError = fromZodError(error);
+      return res.status(400).json({ error: validationError.message });
+    }
+    
+    console.error("Error executing agent task:", error);
+    res.status(500).json({ 
+      error: "Failed to execute agent task",
+      details: (error as Error).message
+    });
+  }
+});
+
+// Execute a chain of agents directly
+router.post("/agent-chain", async (req, res) => {
+  try {
+    // Validate request body
+    const schema = z.object({
+      apiKey: z.string(),
+      input: z.string(),
+      agents: z.array(z.object({
+        type: z.enum(["marketing", "sales"]),
+        instructions: z.string().optional(),
+        parameters: z.record(z.any()).optional(),
+      })),
+      maxSteps: z.number().optional(),
+    });
+
+    const validatedData = schema.parse(req.body);
+    
+    // Execute the agent chain
+    const result = await executeAgentChain(
+      validatedData.apiKey,
+      validatedData.input,
+      validatedData.agents as AgentChainConfig[],
+      validatedData.maxSteps
+    );
+    
+    res.json(result);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const validationError = fromZodError(error);
+      return res.status(400).json({ error: validationError.message });
+    }
+    
+    console.error("Error executing agent chain:", error);
+    res.status(500).json({ 
+      error: "Failed to execute agent chain",
       details: (error as Error).message
     });
   }

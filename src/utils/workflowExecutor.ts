@@ -1,4 +1,5 @@
 import { Node, Connection } from "../types";
+import { executeAgentTask, AgentType } from "../lib/agents";
 
 /**
  * Sort nodes in topological order for execution
@@ -208,6 +209,133 @@ async function executeNode(
         } else {
           outputData.filtered = [];
         }
+        break;
+
+      case "marketing_agent":
+        if (!node.parameters.agentType) {
+          throw new Error("Agent type is required");
+        }
+        
+        // Get API key (either directly or from a connected node)
+        let apiKey = "";
+        if (inputData.apiKey) {
+          apiKey = inputData.apiKey;
+        } else if (node.parameters.apiKey) {
+          apiKey = node.parameters.apiKey;
+        } else {
+          throw new Error("API key is required for agent nodes");
+        }
+        
+        // Get task (either from input or default)
+        const marketingTask = inputData.task || node.parameters.taskDescription || "Generate marketing content";
+        
+        // Execute the agent task
+        const marketingResult = await executeAgentTask(
+          AgentType.MARKETING, 
+          apiKey, 
+          marketingTask
+        );
+        
+        if (marketingResult.success) {
+          outputData.output = marketingResult.output;
+        } else {
+          outputData.error = marketingResult.error;
+        }
+        break;
+        
+      case "sales_agent":
+        if (!node.parameters.agentType) {
+          throw new Error("Agent type is required");
+        }
+        
+        // Get API key (either directly or from a connected node)
+        let salesApiKey = "";
+        if (inputData.apiKey) {
+          salesApiKey = inputData.apiKey;
+        } else if (node.parameters.apiKey) {
+          salesApiKey = node.parameters.apiKey;
+        } else {
+          throw new Error("API key is required for agent nodes");
+        }
+        
+        // Get task (either from input or default)
+        const salesTask = inputData.task || node.parameters.taskDescription || "Generate sales content";
+        
+        // Execute the agent task
+        const salesResult = await executeAgentTask(
+          AgentType.SALES, 
+          salesApiKey, 
+          salesTask
+        );
+        
+        if (salesResult.success) {
+          outputData.output = salesResult.output;
+        } else {
+          outputData.error = salesResult.error;
+        }
+        break;
+        
+      case "agent_chain":
+        // Get API key
+        let chainApiKey = "";
+        if (inputData.apiKey) {
+          chainApiKey = inputData.apiKey;
+        } else if (node.parameters.apiKey) {
+          chainApiKey = node.parameters.apiKey;
+        } else {
+          throw new Error("API key is required for agent chains");
+        }
+        
+        // Get agent chain configuration
+        let agentChainConfig = [];
+        try {
+          agentChainConfig = JSON.parse(node.parameters.agents || "[]");
+        } catch (e) {
+          throw new Error("Invalid agent chain configuration");
+        }
+        
+        if (!agentChainConfig.length) {
+          throw new Error("Agent chain must contain at least one agent");
+        }
+        
+        // Execute the chain of agents
+        let chainInput = inputData.input || "";
+        let chainOutput = "";
+        
+        const maxSteps = parseInt(node.parameters.maxSteps || "5", 10);
+        
+        for (let i = 0; i < Math.min(agentChainConfig.length, maxSteps); i++) {
+          const agentConfig = agentChainConfig[i];
+          
+          if (!agentConfig.type) {
+            throw new Error(`Agent at position ${i} has no type`);
+          }
+          
+          const agentType = agentConfig.type === "marketing" 
+            ? AgentType.MARKETING 
+            : AgentType.SALES;
+          
+          // Append custom instructions if provided
+          const agentTask = `${chainInput}${agentConfig.instructions ? "\n\nInstructions: " + agentConfig.instructions : ""}`;
+          
+          // Execute this agent in the chain
+          const agentResult = await executeAgentTask(
+            agentType,
+            chainApiKey,
+            agentTask
+          );
+          
+          if (!agentResult.success) {
+            outputData.error = `Error in agent chain at step ${i+1}: ${agentResult.error}`;
+            break;
+          }
+          
+          // Use this output as input to the next agent
+          chainInput = agentResult.output;
+          chainOutput = agentResult.output;
+        }
+        
+        outputData.output = chainOutput;
         break;
 
       default:

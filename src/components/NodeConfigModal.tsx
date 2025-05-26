@@ -13,6 +13,7 @@ import { Textarea } from "./ui/textarea";
 import { Node } from "../types";
 import { useWorkflowStore } from "../hooks/useWorkflowStore";
 import { renderIcon } from "../data/nodeTypes";
+import { agentApi } from "../lib/api";
 
 interface NodeConfigModalProps {
   node: Node | null;
@@ -348,6 +349,210 @@ const NodeConfigModal: React.FC<NodeConfigModalProps> = ({
               />
             </div>
           </div>
+        );
+
+      case "marketing_agent":
+        return (
+          <>
+            <div className="space-y-3">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Agent Type</span>
+                </label>
+                <input
+                  type="text"
+                  value={node.parameters?.agentType || "marketing"}
+                  disabled
+                  className="input input-bordered w-full"
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Task Description</span>
+                </label>
+                <textarea
+                  value={node.parameters?.taskDescription || ""}
+                  onChange={(e) =>
+                    onParametersChange({
+                      ...node.parameters,
+                      taskDescription: e.target.value,
+                    })
+                  }
+                  className="textarea textarea-bordered h-24"
+                  placeholder="Describe the marketing task to perform"
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">API Key</span>
+                </label>
+                <input
+                  type="password"
+                  value={node.parameters?.apiKey || ""}
+                  onChange={(e) =>
+                    onParametersChange({
+                      ...node.parameters,
+                      apiKey: e.target.value,
+                    })
+                  }
+                  className="input input-bordered w-full"
+                  placeholder="OpenAI API Key"
+                />
+                <label className="label">
+                  <span className="label-text-alt">
+                    You can provide the API key here or connect from another node
+                  </span>
+                </label>
+              </div>
+            </div>
+          </>
+        );
+
+      case "sales_agent":
+        return (
+          <>
+            <div className="space-y-3">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Agent Type</span>
+                </label>
+                <input
+                  type="text"
+                  value={node.parameters?.agentType || "sales"}
+                  disabled
+                  className="input input-bordered w-full"
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Task Description</span>
+                </label>
+                <textarea
+                  value={node.parameters?.taskDescription || ""}
+                  onChange={(e) =>
+                    onParametersChange({
+                      ...node.parameters,
+                      taskDescription: e.target.value,
+                    })
+                  }
+                  className="textarea textarea-bordered h-24"
+                  placeholder="Describe the sales task to perform"
+                />
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">API Key</span>
+                </label>
+                <input
+                  type="password"
+                  value={node.parameters?.apiKey || ""}
+                  onChange={(e) =>
+                    onParametersChange({
+                      ...node.parameters,
+                      apiKey: e.target.value,
+                    })
+                  }
+                  className="input input-bordered w-full"
+                  placeholder="OpenAI API Key"
+                />
+                <label className="label">
+                  <span className="label-text-alt">
+                    You can provide the API key here or connect from another node
+                  </span>
+                </label>
+              </div>
+            </div>
+          </>
+        );
+
+      case "agent_chain":
+        return (
+          <>
+            <div className="space-y-3">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Agent Chain Configuration</span>
+                </label>
+                <textarea
+                  value={node.parameters?.agents || "[]"}
+                  onChange={(e) =>
+                    onParametersChange({
+                      ...node.parameters,
+                      agents: e.target.value,
+                    })
+                  }
+                  className="textarea textarea-bordered h-40 font-mono text-xs"
+                  placeholder={`[
+  {
+    "type": "marketing",
+    "instructions": "Generate content ideas"
+  },
+  {
+    "type": "sales",
+    "instructions": "Create email based on content"
+  }
+]`}
+                />
+                <label className="label">
+                  <span className="label-text-alt">
+                    JSON array of agents to execute in sequence
+                  </span>
+                </label>
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Max Steps</span>
+                </label>
+                <input
+                  type="number"
+                  value={node.parameters?.maxSteps || "5"}
+                  onChange={(e) =>
+                    onParametersChange({
+                      ...node.parameters,
+                      maxSteps: e.target.value,
+                    })
+                  }
+                  className="input input-bordered w-full"
+                  placeholder="5"
+                  min="1"
+                  max="10"
+                />
+                <label className="label">
+                  <span className="label-text-alt">
+                    Maximum number of agents to execute in the chain
+                  </span>
+                </label>
+              </div>
+
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">API Key</span>
+                </label>
+                <input
+                  type="password"
+                  value={node.parameters?.apiKey || ""}
+                  onChange={(e) =>
+                    onParametersChange({
+                      ...node.parameters,
+                      apiKey: e.target.value,
+                    })
+                  }
+                  className="input input-bordered w-full"
+                  placeholder="OpenAI API Key"
+                />
+                <label className="label">
+                  <span className="label-text-alt">
+                    You can provide the API key here or connect from another node
+                  </span>
+                </label>
+              </div>
+            </div>
+          </>
         );
 
       // Add more node types here following the pattern above

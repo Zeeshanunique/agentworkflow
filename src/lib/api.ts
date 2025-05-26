@@ -167,3 +167,51 @@ export const workflowApi = {
     });
   },
 };
+
+// Agent API
+export interface AgentTaskRequest {
+  agentType: 'marketing' | 'sales';
+  task: string;
+  apiKey: string;
+}
+
+export interface AgentTaskResult {
+  success: boolean;
+  output?: string;
+  logs?: string;
+  error?: string;
+}
+
+export interface AgentChainRequest {
+  apiKey: string;
+  input: string;
+  agents: Array<{
+    type: 'marketing' | 'sales';
+    instructions?: string;
+    parameters?: Record<string, any>;
+  }>;
+  maxSteps?: number;
+}
+
+export interface AgentChainResult {
+  success: boolean;
+  outputs: string[];
+  finalOutput: string;
+  error?: string;
+}
+
+export const agentApi = {
+  executeTask: async (request: AgentTaskRequest) => {
+    return await apiRequest<AgentTaskResult>("/workflows/agent-task", {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
+  },
+
+  executeChain: async (request: AgentChainRequest) => {
+    return await apiRequest<AgentChainResult>("/workflows/agent-chain", {
+      method: "POST",
+      body: JSON.stringify(request),
+    });
+  },
+};
