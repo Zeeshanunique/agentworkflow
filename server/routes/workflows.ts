@@ -5,10 +5,34 @@ import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 
+// Define User interface for type safety
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  // Add other user properties as needed
+}
+
+// Extend Express Request type
+declare global {
+  namespace Express {
+    interface User {
+      id: number;
+      username: string;
+      email: string;
+      // Add other user properties as needed
+    }
+  }
+}
+
 const router = express.Router();
 
 // Middleware to check if user is authenticated
-const isAuthenticated = (req, res, next) => {
+const isAuthenticated = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: "Not authenticated" });
   }
@@ -27,7 +51,8 @@ const workflowSchema = z.object({
 // Get all workflows for the current user
 router.get("/", isAuthenticated, async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    // TypeScript now knows req.user exists because of isAuthenticated middleware
+    const userId = req.user!.id;
     
     const userWorkflows = await db.query.workflows.findMany({
       where: eq(workflows.userId, userId),
@@ -68,7 +93,7 @@ router.get("/:id", async (req, res, next) => {
     }
     
     // Check if workflow is public or belongs to the current user
-    if (!workflow.isPublic && (!req.isAuthenticated() || workflow.userId !== req.user.id)) {
+    if (!workflow.isPublic && (!req.isAuthenticated() || workflow.userId !== req.user?.id)) {
       return res.status(403).json({ error: "You don't have permission to view this workflow" });
     }
     
@@ -81,7 +106,7 @@ router.get("/:id", async (req, res, next) => {
 // Create a new workflow
 router.post("/", isAuthenticated, async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user!.id;
     
     // Validate request body
     const result = workflowSchema.safeParse(req.body);
@@ -112,7 +137,7 @@ router.post("/", isAuthenticated, async (req, res, next) => {
 router.put("/:id", isAuthenticated, async (req, res, next) => {
   try {
     const workflowId = req.params.id;
-    const userId = req.user.id;
+    const userId = req.user!.id;
     
     // Check if workflow exists and belongs to the user
     const existingWorkflow = await db.query.workflows.findFirst({
@@ -161,7 +186,7 @@ router.put("/:id", isAuthenticated, async (req, res, next) => {
 router.delete("/:id", isAuthenticated, async (req, res, next) => {
   try {
     const workflowId = req.params.id;
-    const userId = req.user.id;
+    const userId = req.user!.id;
     
     // Check if workflow exists and belongs to the user
     const existingWorkflow = await db.query.workflows.findFirst({
