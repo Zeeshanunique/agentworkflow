@@ -1,25 +1,48 @@
 import { Client } from "langsmith";
-import dotenv from "dotenv";
 
-// Load environment variables
-dotenv.config();
+// Flag to check if we're in Node.js environment
+const isNode = typeof window === 'undefined';
 
-// Helper to get environment variables that works in both browser and Node.js
-const getEnv = (key: string, defaultValue?: string): string | undefined => {
-  // Browser environment (Vite)
-  if (typeof window !== 'undefined') {
-    return (import.meta.env?.[`VITE_${key}`] as string) || defaultValue;
-  }
-  // Node.js environment
-  return process.env?.[key] || defaultValue;
-};
-
-// Initialize the LangSmith client for tracking
-const apiKey = getEnv('LANGCHAIN_API_KEY');
-const endpoint = getEnv('LANGCHAIN_ENDPOINT', 'https://api.smith.langchain.com');
-const project = getEnv('LANGCHAIN_PROJECT', 'agentworkflow');
-
+// Variable to store environment variables
+let apiKey: string | undefined;
+let endpoint: string;
+let project: string;
 let langsmithClient: Client | null = null;
+
+// Initialize environment
+async function initializeEnvironment() {
+  if (isNode) {
+    // Dynamic import for Node.js only
+    const dotenv = await import("dotenv");
+    // Load environment variables
+    dotenv.config();
+  }
+
+  // Helper to get environment variables that works in both browser and Node.js
+  const getEnv = (key: string, defaultValue?: string): string | undefined => {
+    // Browser environment (Vite)
+    if (!isNode) {
+      return (import.meta.env?.[`VITE_${key}`] as string) || defaultValue;
+    }
+    // Node.js environment
+    return process.env?.[key] || defaultValue;
+  };
+
+  // Initialize the LangSmith client for tracking
+  apiKey = getEnv('LANGCHAIN_API_KEY');
+  endpoint = getEnv('LANGCHAIN_ENDPOINT', 'https://api.smith.langchain.com') || 'https://api.smith.langchain.com';
+  project = getEnv('LANGCHAIN_PROJECT', 'agentworkflow') || 'agentworkflow';
+  
+  // Initialize LangSmith when this module is imported
+  try {
+    initLangSmith();
+  } catch (error) {
+    console.warn("Failed to initialize LangSmith:", error);
+  }
+}
+
+// Call the initialization function
+initializeEnvironment();
 
 export function getLangSmithClient(): Client {
   if (!langsmithClient && apiKey) {
@@ -41,7 +64,7 @@ export function initLangSmith() {
   if (apiKey) {
     // Set environment variables for LangChain to auto-track with LangSmith
     // Only set process.env in Node environment
-    if (typeof window === 'undefined' && process?.env) {
+    if (isNode && process?.env) {
       process.env.LANGCHAIN_TRACING_V2 = "true";
       process.env.LANGCHAIN_PROJECT = project as string;
     }
@@ -94,11 +117,4 @@ export async function getRun(runId: string) {
     console.error(`Failed to get run ${runId}:`, error);
     throw error;
   }
-}
-
-// Initialize LangSmith when this module is imported
-try {
-  initLangSmith();
-} catch (error) {
-  console.warn("Failed to initialize LangSmith:", error);
 } 

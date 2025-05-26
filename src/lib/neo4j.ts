@@ -1,30 +1,45 @@
 import neo4j, { Driver, Session, SessionMode } from "neo4j-driver";
-import dotenv from "dotenv";
 
-// Load environment variables
-dotenv.config();
+// Flag to check if we're in Node.js environment
+const isNode = typeof window === 'undefined';
 
-// Helper to get environment variables that works in both browser and Node.js
-const getEnv = (key: string, defaultValue: string = ""): string => {
-  // Browser environment (Vite)
-  if (typeof window !== 'undefined') {
-    return (import.meta.env?.[`VITE_${key}`] as string) || defaultValue;
+// Variable to store connection details
+let uri: string = '';
+let username: string = '';
+let password: string = '';
+let driver: Driver;
+
+// Initialize environment
+async function initializeEnvironment() {
+  if (isNode) {
+    // Dynamic import for Node.js only
+    const dotenv = await import("dotenv");
+    // Load environment variables
+    dotenv.config();
   }
-  // Node.js environment
-  return process.env?.[key] || defaultValue;
-};
 
-const uri = getEnv("NEO4J_URI");
-const username = getEnv("NEO4J_USERNAME");
-const password = getEnv("NEO4J_PASSWORD");
+  // Helper to get environment variables that works in both browser and Node.js
+  const getEnv = (key: string, defaultValue: string = ""): string => {
+    // Browser environment (Vite)
+    if (!isNode) {
+      return (import.meta.env?.[`VITE_${key}`] as string) || defaultValue;
+    }
+    // Node.js environment
+    return process.env?.[key] || defaultValue;
+  };
 
-// Validate required environment variables
-if (!uri || !username || !password) {
-  console.error("Neo4j configuration missing. Check your .env file.");
+  uri = getEnv("NEO4J_URI");
+  username = getEnv("NEO4J_USERNAME");
+  password = getEnv("NEO4J_PASSWORD");
+
+  // Validate required environment variables
+  if (!uri || !username || !password) {
+    console.error("Neo4j configuration missing. Check your .env file.");
+  }
 }
 
-// Create a driver instance
-let driver: Driver;
+// Call the initialization function
+initializeEnvironment();
 
 /**
  * Get or initialize the Neo4j driver
