@@ -120,15 +120,18 @@ export const useWorkflowStore = create<WorkflowState>()(
 
           state.nodes.push({
             id: nodeId,
-            name: nodeTypeData.name,
-            description: nodeTypeData.description,
+            type: nodeTypeData.type,
             position,
-            nodeType: nodeTypeData,
-            inputs: nodeTypeData.inputs,
-            outputs: nodeTypeData.outputs,
             parameters: nodeTypeData.defaultParameters
               ? { ...nodeTypeData.defaultParameters }
               : {},
+            data: {
+              name: nodeTypeData.name,
+              description: nodeTypeData.description,
+              nodeType: nodeTypeData,
+              inputs: nodeTypeData.inputs,
+              outputs: nodeTypeData.outputs,
+            },
           });
 
           state.selectedNodeId = nodeId;

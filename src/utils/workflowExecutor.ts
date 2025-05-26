@@ -77,7 +77,7 @@ async function executeNode(
   node: Node,
   inputData: Record<string, any>,
 ): Promise<Record<string, any>> {
-  console.log(`Executing node: ${node.name} (${node.nodeType.type})`, {
+  console.log(`Executing node: ${node.data?.name || node.id} (${node.data?.nodeType?.type || node.type})`, {
     inputs: inputData,
     parameters: node.parameters,
   });
@@ -85,7 +85,7 @@ async function executeNode(
   // Check if node has necessary configuration
   if (!node.parameters || Object.keys(node.parameters).length === 0) {
     throw new Error(
-      `Node ${node.name} is not configured properly. Please add required parameters.`,
+      `Node ${node.data?.name || node.id} is not configured properly. Please add required parameters.`,
     );
   }
 
@@ -94,7 +94,7 @@ async function executeNode(
 
   try {
     // Execute based on node type
-    switch (node.nodeType.type) {
+    switch (node.data?.nodeType?.type || node.type) {
       case "openai_assistant":
         if (!node.parameters.apiKey) {
           throw new Error("OpenAI API key is required");
@@ -218,7 +218,7 @@ async function executeNode(
 
     return outputData;
   } catch (error) {
-    console.error(`Error executing node ${node.name}:`, error);
+    console.error(`Error executing node ${node.data?.name || node.id}:`, error);
     throw error;
   }
 }
@@ -285,11 +285,11 @@ export async function executeWorkflow(
         // Store the result
         nodeResults.set(node.id, outputData);
       } catch (error: any) {
-        console.error(`Error in node ${node.name}:`, error);
+        console.error(`Error in node ${node.data?.name || node.id}:`, error);
         return {
           success: false,
           results: Object.fromEntries(nodeResults.entries()),
-          error: `Error in node "${node.name}": ${error.message}`,
+          error: `Error in node "${node.data?.name || node.id}": ${error.message}`,
         };
       }
     }
