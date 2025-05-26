@@ -37,7 +37,6 @@ function App() {
           <Redirect to="/login" />
         ) : (
           <DashboardPage
-            isAuthenticated={isAuthenticated}
             username={user?.username}
           />
         )}
