@@ -24,6 +24,13 @@ const CustomNode = ({
   const { node, onParametersChange, status = "idle", statusMessage } = data;
   const [configModalOpen, setConfigModalOpen] = useState(false);
 
+  // Safely access node properties
+  const nodeType = node.nodeType || node.data?.nodeType;
+  const inputs = node.inputs || node.data?.inputs || [];
+  const outputs = node.outputs || node.data?.outputs || [];
+  const colorClass = nodeType?.colorClass || 'bg-gray-600';
+  const icon = nodeType?.icon;
+
   // Check if node has been configured
   const hasConfiguration = Object.keys(node.parameters || {}).length > 0;
 
@@ -39,7 +46,7 @@ const CustomNode = ({
       />
 
       <div
-        className={`px-3 py-2 rounded-lg shadow-md border ${node.nodeType.colorClass} border-border relative transition-all duration-200 ${
+        className={`px-3 py-2 rounded-lg shadow-md border ${colorClass} border-border relative transition-all duration-200 ${
           selected ? "ring-2 ring-primary" : ""
         }`}
       >
@@ -47,9 +54,9 @@ const CustomNode = ({
         <div className="flex items-center justify-between gap-2 mb-1">
           <div className="flex items-center gap-2">
             <div className="flex-shrink-0">
-              {renderIcon(node.nodeType.icon)}
+              {icon ? renderIcon(icon) : null}
             </div>
-            <div className="text-sm font-medium">{node.name}</div>
+            <div className="text-sm font-medium">{node.name || node.data?.name || 'Unnamed Node'}</div>
           </div>
           <button
             onClick={(e) => {
@@ -67,9 +74,9 @@ const CustomNode = ({
         </div>
 
         {/* Input ports */}
-        {node.inputs.length > 0 && (
+        {inputs.length > 0 && (
           <div className="mt-3 space-y-1">
-            {node.inputs.map((input) => (
+            {inputs.map((input) => (
               <div key={input.id} className="flex items-center text-xs">
                 <Handle
                   type="target"
@@ -87,9 +94,9 @@ const CustomNode = ({
         )}
 
         {/* Output ports */}
-        {node.outputs.length > 0 && (
+        {outputs.length > 0 && (
           <div className="mt-3 space-y-1">
-            {node.outputs.map((output) => (
+            {outputs.map((output) => (
               <div
                 key={output.id}
                 className="flex items-center justify-end text-xs"
