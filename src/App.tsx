@@ -47,7 +47,6 @@ function App() {
           <Redirect to="/login" />
         ) : (
           <WorkflowPage
-            isAuthenticated={isAuthenticated}
             username={user?.username}
           />
         )}

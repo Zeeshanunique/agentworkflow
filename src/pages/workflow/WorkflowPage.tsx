@@ -5,19 +5,16 @@ import { executeWorkflow } from "../../utils/workflowExecutor";
 import { MainLayout } from "../../components/layout";
 import Toolbar from "../../components/Toolbar";
 import CanvasFlow from "../../components/CanvasFlow";
-import { Sidebar } from "../../components/layout";
 import { nodeCategories } from "../../data/nodeTypes";
 
 interface WorkflowPageProps {
-  isAuthenticated?: boolean;
   username?: string;
 }
 
 export default function WorkflowPage({
-  isAuthenticated,
   username,
 }: WorkflowPageProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen] = useState(true);
   const { toast } = useToast();
   const [isRunning, setIsRunning] = useState(false);
 
@@ -146,20 +143,15 @@ export default function WorkflowPage({
 
   return (
     <MainLayout username={username}>
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar
-          isOpen={sidebarOpen}
-          nodeCategories={nodeCategories}
-          onNodeAdd={handleAddNode}
-        />
-        <div className="flex-1 flex flex-col">
+      <div className="flex flex-1 h-full overflow-hidden">
+        <div className="flex-1 flex flex-col h-full">
           <Toolbar
             onRun={handleRunWorkflow}
             onStop={handleStopWorkflow}
             isRunning={isRunning}
             isCollaborating={false}
           />
-          <div className="flex-1">
+          <div className="flex-1 h-[calc(100vh-112px)]">
             <CanvasFlow
               nodes={nodes}
               connections={connections}
