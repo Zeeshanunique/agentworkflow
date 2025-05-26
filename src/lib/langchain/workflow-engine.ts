@@ -1,5 +1,5 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { RunnableSequence, RunnableLambda } from "langchain/runnables";
+import { RunnableSequence, RunnableLambda } from "@langchain/core/runnables";
 import { 
   StateGraph, 
   END, 
