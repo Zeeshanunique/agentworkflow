@@ -18,6 +18,15 @@ export default function WorkflowLayout({
 }: WorkflowLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  // Provide a default noop function to ensure onNodeAdd is never undefined
+  const handleNodeAdd = (nodeType: string) => {
+    if (onNodeAdd) {
+      onNodeAdd(nodeType);
+    } else {
+      console.log('Node add handler not provided for node type:', nodeType);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       <Header
@@ -29,7 +38,7 @@ export default function WorkflowLayout({
         <Sidebar
           isOpen={sidebarOpen}
           nodeCategories={nodeCategories}
-          onNodeAdd={onNodeAdd}
+          onNodeAdd={handleNodeAdd}
         />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
