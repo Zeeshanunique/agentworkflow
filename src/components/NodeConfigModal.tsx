@@ -42,6 +42,9 @@ const NodeConfigModal: React.FC<NodeConfigModalProps> = ({
 
   if (!node) return null;
 
+  // Safely access node properties
+  const nodeType = node.nodeType || node.data?.nodeType;
+
   const handleSave = () => {
     if (node) {
       // Handle config as Record<string, string>
@@ -65,7 +68,17 @@ const NodeConfigModal: React.FC<NodeConfigModalProps> = ({
   };
 
   const renderConfigFields = () => {
-    const nodeType = node.nodeType;
+    // Use the safely accessed nodeType 
+    if (!nodeType) {
+      return (
+        <div className="p-4 text-center text-muted-foreground">
+          <p>Unable to determine node type.</p>
+          <p className="text-xs mt-2">
+            This node may be corrupted or missing configuration.
+          </p>
+        </div>
+      );
+    }
 
     // Determine which fields to show based on node type
     switch (nodeType.type) {
@@ -574,10 +587,10 @@ const NodeConfigModal: React.FC<NodeConfigModalProps> = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <span className={`p-1 rounded ${node.nodeType.colorClass}`}>
-              {renderIcon(node.nodeType.icon)}
+            <span className={`p-1 rounded ${nodeType?.colorClass || 'bg-gray-600'}`}>
+              {nodeType?.icon ? renderIcon(nodeType.icon) : null}
             </span>
-            <span>Configure {node.name}</span>
+            <span>Configure {node.name || node.data?.name || 'Node'}</span>
           </DialogTitle>
         </DialogHeader>
 
