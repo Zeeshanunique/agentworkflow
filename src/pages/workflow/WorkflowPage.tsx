@@ -6,7 +6,7 @@ import { MainLayout } from "../../components/layout";
 import Toolbar from "../../components/Toolbar";
 import CanvasFlow from "../../components/CanvasFlow";
 import { Sidebar } from "../../components/layout";
-import { nodeCategories, renderIcon } from "../../data/nodeTypes";
+import { nodeCategories } from "../../data/nodeTypes";
 
 interface WorkflowPageProps {
   username?: string;
@@ -149,31 +149,11 @@ export default function WorkflowPage({
   return (
     <MainLayout username={username}>
       <div className="flex flex-1 h-full overflow-hidden">
-        {/* Node Categories Sidebar */}
-        <div className={`${sidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 bg-background border-r border-border overflow-hidden`}>
-          <div className="p-4">
-            <h2 className="text-lg font-semibold mb-4">Nodes</h2>
-            {nodeCategories.map((category) => (
-              <div key={category.id} className="mb-4">
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">
-                  {category.name}
-                </h3>
-                <div className="space-y-1">
-                  {category.nodes.map((node) => (
-                    <button
-                      key={node.type}
-                      onClick={() => handleAddNode(node.type)}
-                      className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-accent flex items-center"
-                    >
-                      <span className="mr-2">{renderIcon(node.icon) || '⚡'}</span>
-                      {node.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <Sidebar 
+          isOpen={sidebarOpen}
+          nodeCategories={nodeCategories}
+          onNodeAdd={handleAddNode}
+        />
 
         <div className="flex-1 flex flex-col h-full">
           <Toolbar
