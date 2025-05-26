@@ -149,13 +149,15 @@ export default function WorkflowPage({
   return (
     <MainLayout username={username}>
       <div className="flex flex-1 h-full overflow-hidden">
+        {/* Render the sidebar outside the main content flow due to its fixed positioning */}
         <Sidebar 
           isOpen={sidebarOpen}
           nodeCategories={nodeCategories}
           onNodeAdd={handleAddNode}
         />
 
-        <div className="flex-1 flex flex-col h-full">
+        {/* Main content with margin to account for the fixed sidebar */}
+        <div className={`flex-1 flex flex-col h-full ${sidebarOpen ? 'ml-72' : 'ml-0'} transition-all duration-300`}>
           <Toolbar
             onRun={handleRunWorkflow}
             onStop={handleStopWorkflow}
