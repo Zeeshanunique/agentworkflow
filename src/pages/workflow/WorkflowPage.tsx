@@ -2,13 +2,18 @@ import { useState } from 'react';
 import { useToast } from '../../components/ToastProvider';
 import { useWorkflowStore } from '../../hooks/useWorkflowStore';
 import { executeWorkflow } from '../../utils/workflowExecutor';
-import Header from '../../components/Header';
-import Sidebar from '../../components/Sidebar';
+import { MainLayout } from '../../components/layout';
 import Toolbar from '../../components/Toolbar';
 import CanvasFlow from '../../components/CanvasFlow';
+import { Sidebar } from '../../components/layout';
 import { nodeCategories } from '../../data/nodeTypes';
 
-export default function WorkflowPage({ isAuthenticated, username }: { isAuthenticated?: boolean; username?: string }) {
+interface WorkflowPageProps {
+  isAuthenticated?: boolean;
+  username?: string;
+}
+
+export default function WorkflowPage({ isAuthenticated, username }: WorkflowPageProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { toast } = useToast();
   const [isRunning, setIsRunning] = useState(false);
@@ -128,8 +133,7 @@ export default function WorkflowPage({ isAuthenticated, username }: { isAuthenti
   };
   
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
-      <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} isAuthenticated={isAuthenticated} username={username} />
+    <MainLayout username={username}>
       <div className="flex flex-1 overflow-hidden">
         <Sidebar 
           isOpen={sidebarOpen} 
@@ -157,6 +161,6 @@ export default function WorkflowPage({ isAuthenticated, username }: { isAuthenti
           </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 } 

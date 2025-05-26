@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
-import Header from '../../components/Header';
+import { MainLayout } from '../../components/layout';
 
-export default function DashboardPage({ isAuthenticated, username }: { isAuthenticated?: boolean; username?: string }) {
+interface DashboardPageProps {
+  isAuthenticated?: boolean;
+  username?: string;
+}
+
+export default function DashboardPage({ isAuthenticated, username }: DashboardPageProps) {
   const [workflowStats, setWorkflowStats] = useState({
     total: 0,
     completed: 0,
@@ -21,8 +26,7 @@ export default function DashboardPage({ isAuthenticated, username }: { isAuthent
   }, []);
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
-      <Header isAuthenticated={isAuthenticated} username={username} />
+    <MainLayout username={username}>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
         
@@ -81,6 +85,6 @@ export default function DashboardPage({ isAuthenticated, username }: { isAuthent
           </div>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 } 
