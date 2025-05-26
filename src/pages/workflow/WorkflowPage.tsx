@@ -5,6 +5,8 @@ import { executeWorkflow } from "../../utils/workflowExecutor";
 import { MainLayout } from "../../components/layout";
 import Toolbar from "../../components/Toolbar";
 import CanvasFlow from "../../components/CanvasFlow";
+import { Sidebar } from "../../components/layout";
+import { nodeCategories, renderIcon } from "../../data/nodeTypes";
 
 interface WorkflowPageProps {
   username?: string;
@@ -13,6 +15,7 @@ interface WorkflowPageProps {
 export default function WorkflowPage({
   username,
 }: WorkflowPageProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const { toast } = useToast();
   const [isRunning, setIsRunning] = useState(false);
 
@@ -30,6 +33,17 @@ export default function WorkflowPage({
   const resetNodeStatuses = useWorkflowStore(
     (state) => state.resetNodeStatuses,
   );
+
+  // Add node from sidebar
+  const handleAddNode = (nodeType: string) => {
+    // Place new node at a default position (center-ish)
+    const position = {
+      x: 400 + Math.random() * 100,
+      y: 200 + Math.random() * 100,
+    };
+    addNode(nodeType, position);
+    toast({ title: "Node added", description: `Added ${nodeType} node` });
+  };
 
   // Handle node parameter changes
   const handleNodeParametersChange = (
@@ -127,16 +141,47 @@ export default function WorkflowPage({
       description: "Execution has been stopped",
     });
   };
+  
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   return (
     <MainLayout username={username}>
       <div className="flex flex-1 h-full overflow-hidden">
+        {/* Node Categories Sidebar */}
+        <div className={`${sidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 bg-background border-r border-border overflow-hidden`}>
+          <div className="p-4">
+            <h2 className="text-lg font-semibold mb-4">Nodes</h2>
+            {nodeCategories.map((category) => (
+              <div key={category.id} className="mb-4">
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                  {category.name}
+                </h3>
+                <div className="space-y-1">
+                  {category.nodes.map((node) => (
+                    <button
+                      key={node.type}
+                      onClick={() => handleAddNode(node.type)}
+                      className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-accent flex items-center"
+                    >
+                      <span className="mr-2">{renderIcon(node.icon) || '⚡'}</span>
+                      {node.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="flex-1 flex flex-col h-full">
           <Toolbar
             onRun={handleRunWorkflow}
             onStop={handleStopWorkflow}
             isRunning={isRunning}
             isCollaborating={false}
+            onToggleSidebar={toggleSidebar}
           />
           <div className="flex-1 h-[calc(100vh-112px)]">
             <CanvasFlow

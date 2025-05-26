@@ -1,5 +1,5 @@
 import React from "react";
-import { Save, Play, Plus, Users, Square } from "lucide-react";
+import { Save, Play, Plus, Users, Square, Menu } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface ToolbarProps {
@@ -8,6 +8,7 @@ interface ToolbarProps {
   onStop?: () => void;
   isRunning?: boolean;
   isCollaborating?: boolean;
+  onToggleSidebar?: () => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
@@ -16,9 +17,22 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onStop,
   isRunning = false,
   isCollaborating = false,
+  onToggleSidebar,
 }) => {
   return (
     <div className="bg-background border-b border-border py-2 px-4 flex items-center gap-2">
+      {onToggleSidebar && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggleSidebar}
+          title="Toggle Sidebar"
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Menu size={18} />
+        </Button>
+      )}
+
       <Button
         variant="ghost"
         size="icon"
