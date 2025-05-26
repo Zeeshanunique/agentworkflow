@@ -385,6 +385,66 @@ export const nodeTypes: NodeType[] = [
       headers: "{}",
     },
   },
+  {
+    type: "marketing_agent",
+    name: "Marketing Agent",
+    description: "AI agent specialized in marketing tasks (content, ads, emails)",
+    category: "ai",
+    icon: "brain",
+    colorClass: "bg-blue-600",
+    inputs: [
+      { id: "task", name: "Task", type: "string" },
+      { id: "apiKey", name: "API Key", type: "string" },
+    ],
+    outputs: [
+      { id: "output", name: "Output", type: "string" },
+      { id: "error", name: "Error", type: "string" },
+    ],
+    defaultParameters: {
+      agentType: "marketing",
+      taskDescription: "Generate a social media post about our new product",
+    },
+  },
+  {
+    type: "sales_agent",
+    name: "Sales Agent",
+    description: "AI agent specialized in sales tasks (lead qualification, objection handling, follow-ups)",
+    category: "ai",
+    icon: "brain",
+    colorClass: "bg-amber-600",
+    inputs: [
+      { id: "task", name: "Task", type: "string" },
+      { id: "apiKey", name: "API Key", type: "string" },
+    ],
+    outputs: [
+      { id: "output", name: "Output", type: "string" },
+      { id: "error", name: "Error", type: "string" },
+    ],
+    defaultParameters: {
+      agentType: "sales",
+      taskDescription: "Generate a follow-up email for a prospect who showed interest but hasn't responded in a week",
+    },
+  },
+  {
+    type: "agent_chain",
+    name: "Agent Chain",
+    description: "Connect multiple agents together in a workflow chain",
+    category: "ai",
+    icon: "chevronRight",
+    colorClass: "bg-purple-600",
+    inputs: [
+      { id: "input", name: "Input", type: "string" },
+      { id: "apiKey", name: "API Key", type: "string" },
+    ],
+    outputs: [
+      { id: "output", name: "Output", type: "string" },
+      { id: "error", name: "Error", type: "string" },
+    ],
+    defaultParameters: {
+      agents: "[]", // JSON string representing agent chain configuration
+      maxSteps: "5",
+    },
+  },
 ];
 
 export const getNodeTypeByType = (type: string): NodeType | undefined => {
