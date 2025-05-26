@@ -66,7 +66,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ className }) => {
         setError(response.error);
       } else if (response.data?.user) {
         setUser(response.data.user);
-        navigate('/');
+        navigate('/workflow', { replace: true });
       }
     } catch (error) {
       setError('An unexpected error occurred. Please try again.');
@@ -92,7 +92,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ className }) => {
         setError(response.error);
       } else if (response.data?.user) {
         setUser(response.data.user);
-        navigate('/');
+        navigate('/workflow', { replace: true });
       }
     } catch (error) {
       setError('An unexpected error occurred. Please try again.');

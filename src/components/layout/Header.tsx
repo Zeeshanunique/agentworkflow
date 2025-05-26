@@ -80,18 +80,19 @@ export const Header: React.FC<HeaderProps> = ({
             <Menu size={20} />
           </button>
         )}
-        <Link href="/">
-          <a className="flex items-center">
-            <div className="bg-primary text-primary-foreground p-1.5 rounded mr-2">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M12 16V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <h1 className="text-xl font-semibold">AgentWorkflow</h1>
-          </a>
-        </Link>
+        <div 
+          className="flex items-center cursor-pointer" 
+          onClick={() => navigate('/')}
+        >
+          <div className="bg-primary text-primary-foreground p-1.5 rounded mr-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 16V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <h1 className="text-xl font-semibold">AgentWorkflow</h1>
+        </div>
         
         {/* Navigation for authenticated users */}
         {isAuthenticated && (
@@ -99,28 +100,20 @@ export const Header: React.FC<HeaderProps> = ({
             <Button 
               variant={activeTab === 'workflow' ? 'secondary' : 'ghost'} 
               size="sm" 
-              asChild
+              onClick={() => navigate('/workflow')}
               className="flex items-center gap-1"
             >
-              <Link href="/workflow">
-                <a className="flex items-center gap-1">
-                  <GitBranch size={16} />
-                  <span>Workflow</span>
-                </a>
-              </Link>
+              <GitBranch size={16} />
+              <span>Workflow</span>
             </Button>
             <Button 
               variant={activeTab === 'dashboard' ? 'secondary' : 'ghost'} 
               size="sm" 
-              asChild
+              onClick={() => navigate('/dashboard')}
               className="flex items-center gap-1"
             >
-              <Link href="/dashboard">
-                <a className="flex items-center gap-1">
-                  <LayoutDashboard size={16} />
-                  <span>Dashboard</span>
-                </a>
-              </Link>
+              <LayoutDashboard size={16} />
+              <span>Dashboard</span>
             </Button>
           </nav>
         )}
@@ -142,10 +135,12 @@ export const Header: React.FC<HeaderProps> = ({
         )}
         
         {!isAuthenticated && (
-          <Button asChild size="sm" variant="default">
-            <Link href="/login">
-              <a>Login</a>
-            </Link>
+          <Button 
+            size="sm" 
+            variant="default"
+            onClick={() => navigate('/login')}
+          >
+            Login
           </Button>
         )}
         
