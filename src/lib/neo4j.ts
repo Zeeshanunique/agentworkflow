@@ -23,16 +23,8 @@ export function getDriver(): Driver {
   if (!driver) {
     try {
       console.log(`Attempting to connect to Neo4j at ${uri}`);
-      driver = neo4j.driver(
-        uri, 
-        neo4j.auth.basic(username, password),
-        {
-          maxConnectionLifetime: 3 * 60 * 60 * 1000, // 3 hours
-          maxConnectionPoolSize: 50,
-          connectionAcquisitionTimeout: 2 * 60 * 1000, // 120 seconds
-          // Don't specify encryption settings here since they're already in the URI (neo4j+s://)
-        }
-      );
+      // Using simpler connection approach - no additional options
+      driver = neo4j.driver(uri, neo4j.auth.basic(username, password));
       console.log("Neo4j driver created successfully");
     } catch (error) {
       console.error("Failed to create Neo4j driver:", error);
@@ -82,20 +74,15 @@ export async function runQuery(cypher: string, params = {}): Promise<any> {
  * Verify the Neo4j connection
  */
 export async function verifyConnection(): Promise<boolean> {
-  let session = null;
   try {
     console.log("Verifying Neo4j connection...");
-    session = getDriver().session();
-    const result = await session.run("RETURN 1 AS result");
-    const connected = result.records[0].get("result") === 1;
-    console.log(`Neo4j connection verified: ${connected ? "Success" : "Failed"}`);
-    return connected;
+    const driver = getDriver();
+    const serverInfo = await driver.getServerInfo();
+    console.log(`Neo4j connection verified: Success`);
+    console.log(`Connected to Neo4j ${serverInfo.agent}`);
+    return true;
   } catch (error) {
     console.error("Neo4j connection error:", error);
     return false;
-  } finally {
-    if (session) {
-      await session.close();
-    }
   }
 } 
