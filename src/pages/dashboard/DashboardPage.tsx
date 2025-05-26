@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { MainLayout } from "../../components/layout";
+import { Neo4jWorkflowInfo } from "../../components/workflow/Neo4jWorkflowInfo";
 
 interface DashboardPageProps {
   username?: string;
@@ -63,6 +64,12 @@ export default function DashboardPage({
                 {workflowStats.inProgress}
               </p>
             </div>
+          </div>
+          
+          {/* Neo4j Graph Database Integration */}
+          <div className="mb-8">
+            <h2 className="text-xl font-bold mb-4">Graph Database Integration</h2>
+            <Neo4jWorkflowInfo />
           </div>
 
           <div className="bg-card p-6 rounded-lg shadow mb-8">

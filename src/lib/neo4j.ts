@@ -1,4 +1,4 @@
-import neo4j, { Driver } from "neo4j-driver";
+import neo4j, { Driver, Session, SessionMode } from "neo4j-driver";
 import dotenv from "dotenv";
 
 // Load environment variables

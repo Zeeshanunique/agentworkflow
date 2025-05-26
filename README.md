@@ -9,6 +9,9 @@ A modern web application for building, automating, and optimizing AI agent workf
 - **Analytics Dashboard**: Monitor performance and optimize workflows
 - **User Authentication**: Secure login and registration system
 - **Modern UI**: Beautiful and responsive design with dark mode support
+- **Neo4j Graph Database**: Store and query workflow data with powerful graph capabilities
+- **LangGraph Integration**: Create and execute intelligent agent workflows
+- **LangSmith Tracing**: Track and analyze agent interactions and performance
 
 ## Tech Stack
 
@@ -19,6 +22,10 @@ A modern web application for building, automating, and optimizing AI agent workf
 - **TailwindCSS**: Utility-first CSS framework
 - **Shadcn/UI**: Component library based on Radix UI
 - **React Hook Form**: Form validation with Zod
+- **Neo4j**: Graph database for workflow storage
+- **LangChain**: Framework for building LLM applications
+- **LangGraph**: Framework for building agentic workflows
+- **LangSmith**: Observability platform for LLM apps
 
 ## Project Structure
 
@@ -33,6 +40,9 @@ src/
 ├── data/                # Static data and constants
 ├── hooks/               # Custom React hooks
 ├── lib/                 # Utility libraries and API clients
+│   ├── langchain/       # LangChain and LangGraph integration
+│   ├── models/          # Data models including Neo4j models
+│   └── neo4j.ts         # Neo4j database configuration
 ├── pages/               # Page components
 │   ├── auth/            # Authentication pages
 │   ├── dashboard/       # Dashboard pages
@@ -46,8 +56,11 @@ src/
 
 ### Prerequisites
 
-- Node.js (v14 or later)
+- Node.js (v18 or later)
 - npm or yarn
+- Neo4j Database (a free Aura instance works great)
+- LangSmith account (for observability)
+- OpenAI API key (for LLM capabilities)
 
 ### Installation
 
@@ -64,14 +77,58 @@ src/
    yarn
    ```
 
-3. Start the development server
+3. Configure environment variables
    ```bash
-   npm run dev
-   # or
-   yarn dev
+   cp .env.example .env
+   ```
+   Edit the `.env` file and add your:
+   - Neo4j connection details (URI, username, password)
+   - LangSmith API key and project name
+   - OpenAI API key
+
+4. Start the development server
+   ```bash
+   # Regular development
+   npm run dev:all
+   
+   # Development with Neo4j and LangSmith enabled
+   npm run neo4j:dev:all
    ```
 
-4. Open [http://localhost:5173](http://localhost:5173) in your browser
+5. Open [http://localhost:5173](http://localhost:5173) in your browser
+
+## Neo4j Integration
+
+This project uses Neo4j to store workflow data as a graph, which provides several advantages:
+
+- **Natural representation**: Workflows are inherently graph structures
+- **Efficient queries**: Finding paths and relationships between nodes
+- **Flexibility**: Easy to model complex workflow structures
+
+### Setting up Neo4j
+
+1. Create a free [Neo4j Aura](https://neo4j.com/cloud/platform/aura-graph-database/) account
+2. Create a new database instance
+3. Add the connection details to your `.env` file:
+   ```
+   NEO4J_URI=neo4j+s://your-instance-id.databases.neo4j.io
+   NEO4J_USERNAME=neo4j
+   NEO4J_PASSWORD=your-password
+   ```
+
+## LangGraph & LangSmith
+
+LangGraph enables the creation of stateful, agentic workflows using LLMs. LangSmith provides observability and debugging for these workflows.
+
+### Setting up LangSmith
+
+1. Create a [LangSmith](https://smith.langchain.com/) account
+2. Create a new project called "agentworkflow"
+3. Get your API key and add it to your `.env` file:
+   ```
+   LANGCHAIN_API_KEY=your-api-key
+   LANGCHAIN_PROJECT=agentworkflow
+   ```
 
 ## Contributing
 
