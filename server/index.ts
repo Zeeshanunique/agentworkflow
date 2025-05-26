@@ -12,7 +12,10 @@ import { db, runMigrations } from "./db";
 import { setupPassport } from "./middleware/auth";
 import authRoutes from "./routes/auth";
 import workflowsRoutes from "./routes/workflows";
+import workflowApiRoutes from "./api/workflow";
 import { setupWebSocketServer } from "./utils/websocket";
+import { verifyConnection as verifyNeo4jConnection } from "../src/lib/neo4j";
+import { initLangSmith } from "../src/lib/langchain/langsmith";
 
 // For ESM compatibility
 const __filename = fileURLToPath(import.meta.url);
