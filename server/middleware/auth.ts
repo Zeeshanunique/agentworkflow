@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
-import { users } from "../db/schema";
+import { users } from "../database/schemas/users"; // ✅ updated import
 import bcrypt from "bcryptjs";
 
 export function setupPassport() {
