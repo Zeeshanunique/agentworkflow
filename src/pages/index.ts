@@ -1,5 +1,5 @@
 // Auth pages
-export { default as LoginPage } from './auth/LoginPage';
+export { LoginPage } from './auth';
 
 // Dashboard pages
 export { default as DashboardPage } from './dashboard/DashboardPage';
@@ -7,5 +7,5 @@ export { default as DashboardPage } from './dashboard/DashboardPage';
 // Workflow pages
 export { default as WorkflowPage } from './workflow/WorkflowPage';
 
-// Landing page
-export { default as LandingPage } from './LandingPage'; 
+// Home page
+export { default as HomePage } from './home'; 

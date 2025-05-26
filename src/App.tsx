@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Route, Switch, useLocation } from 'wouter';
 import { useWorkflowStore } from './hooks/useWorkflowStore';
-import { LoginPage, WorkflowPage, DashboardPage, LandingPage } from './pages';
+import { LoginPage, WorkflowPage, DashboardPage, HomePage } from './pages';
 
 function App() {
   const user = useWorkflowStore((state) => state.user);
@@ -9,17 +9,17 @@ function App() {
   const [, navigate] = useLocation();
 
   useEffect(() => {
-    if (!isAuthenticated && window.location.pathname !== '/login' && window.location.pathname !== '/landing') {
+    if (!isAuthenticated && window.location.pathname !== '/login' && window.location.pathname !== '/') {
       navigate('/login', { replace: true });
     } else if (isAuthenticated && window.location.pathname === '/login') {
-      navigate('/', { replace: true });
+      navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
   return (
     <Switch>
-      <Route path="/landing">
-        <LandingPage />
+      <Route path="/">
+        <HomePage />
       </Route>
       <Route path="/login">
         {isAuthenticated ? null : <LoginPage />}
@@ -29,7 +29,7 @@ function App() {
           <DashboardPage isAuthenticated={isAuthenticated} username={user?.username} />
         )}
       </Route>
-      <Route path="/">
+      <Route path="/workflow">
         {!isAuthenticated ? null : (
           <WorkflowPage isAuthenticated={isAuthenticated} username={user?.username} />
         )}
