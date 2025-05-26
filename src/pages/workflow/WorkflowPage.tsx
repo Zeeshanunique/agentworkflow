@@ -33,6 +33,7 @@ export default function WorkflowPage({
   const resetNodeStatuses = useWorkflowStore(
     (state) => state.resetNodeStatuses,
   );
+  const deleteNode = useWorkflowStore((state) => state.deleteNode);
 
   // Add node from sidebar
   const handleAddNode = (nodeType: string) => {
@@ -175,6 +176,7 @@ export default function WorkflowPage({
               onNodeParametersChange={handleNodeParametersChange}
               selectedNodeId={selectedNodeId}
               nodeStatuses={nodeStatuses}
+              onNodeDelete={deleteNode}
             />
           </div>
         </div>
