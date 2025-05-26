@@ -5,4 +5,7 @@ export { default as LoginPage } from './auth/LoginPage';
 export { default as DashboardPage } from './dashboard/DashboardPage';
 
 // Workflow pages
-export { default as WorkflowPage } from './workflow/WorkflowPage'; 
+export { default as WorkflowPage } from './workflow/WorkflowPage';
+
+// Landing page
+export { default as LandingPage } from './LandingPage'; 

@@ -1,5 +1,5 @@
-import AuthForm from '../../components/AuthForm';
+import EnhancedAuthForm from '../../components/EnhancedAuthForm';
 
 export default function LoginPage() {
-  return <AuthForm />;
+  return <EnhancedAuthForm />;
 } 
