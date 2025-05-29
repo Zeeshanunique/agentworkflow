@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { MainLayout } from "../../components/layout";
-import { Neo4jWorkflowInfo } from "../../components/workflow/Neo4jWorkflowInfo";
 
 interface DashboardPageProps {
   username?: string;
@@ -66,10 +65,14 @@ export default function DashboardPage({
             </div>
           </div>
           
-          {/* Neo4j Graph Database Integration */}
+          {/* PostgreSQL Database Integration */}
           <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Graph Database Integration</h2>
-            <Neo4jWorkflowInfo />
+            <h2 className="text-xl font-bold mb-4">PostgreSQL Database Integration</h2>
+            <div className="bg-card p-4 rounded-lg shadow">
+              <p className="text-muted-foreground">
+                Using PostgreSQL for workflow storage and execution tracking.
+              </p>
+            </div>
           </div>
 
           <div className="bg-card p-6 rounded-lg shadow mb-8">

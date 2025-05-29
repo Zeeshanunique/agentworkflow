@@ -9,7 +9,7 @@ A modern web application for building, automating, and optimizing AI agent workf
 - **Analytics Dashboard**: Monitor performance and optimize workflows
 - **User Authentication**: Secure login and registration system
 - **Modern UI**: Beautiful and responsive design with dark mode support
-- **Neo4j Graph Database**: Store and query workflow data with powerful graph capabilities
+- **PostgreSQL Database**: Store and query workflow data with relational database capabilities
 - **LangGraph Integration**: Create and execute intelligent agent workflows
 - **LangSmith Tracing**: Track and analyze agent interactions and performance
 
@@ -22,7 +22,7 @@ A modern web application for building, automating, and optimizing AI agent workf
 - **TailwindCSS**: Utility-first CSS framework
 - **Shadcn/UI**: Component library based on Radix UI
 - **React Hook Form**: Form validation with Zod
-- **Neo4j**: Graph database for workflow storage
+- **PostgreSQL**: Relational database for workflow storage
 - **LangChain**: Framework for building LLM applications
 - **LangGraph**: Framework for building agentic workflows
 - **LangSmith**: Observability platform for LLM apps
@@ -41,8 +41,8 @@ src/
 ├── hooks/               # Custom React hooks
 ├── lib/                 # Utility libraries and API clients
 │   ├── langchain/       # LangChain and LangGraph integration
-│   ├── models/          # Data models including Neo4j models
-│   └── neo4j.ts         # Neo4j database configuration
+│   ├── models/          # Data models for PostgreSQL
+│   └── database/        # Database configuration and utilities
 ├── pages/               # Page components
 │   ├── auth/            # Authentication pages
 │   ├── dashboard/       # Dashboard pages
@@ -58,7 +58,7 @@ src/
 
 - Node.js (v18 or later)
 - npm or yarn
-- Neo4j Database (a free Aura instance works great)
+- PostgreSQL Database (local or cloud instance)
 - LangSmith account (for observability)
 - OpenAI API key (for LLM capabilities)
 
@@ -80,9 +80,8 @@ src/
 3. Configure environment variables
    ```bash
    cp .env.example .env
-   ```
-   Edit the `.env` file and add your:
-   - Neo4j connection details (URI, username, password)
+   ```   Edit the `.env` file and add your:
+   - PostgreSQL connection details (database URL)
    - LangSmith API key and project name
    - OpenAI API key
 
@@ -90,30 +89,31 @@ src/
    ```bash
    # Regular development
    npm run dev:all
-   
-   # Development with Neo4j and LangSmith enabled
-   npm run neo4j:dev:all
    ```
 
 5. Open [http://localhost:5173](http://localhost:5173) in your browser
 
-## Neo4j Integration
+## PostgreSQL Integration
 
-This project uses Neo4j to store workflow data as a graph, which provides several advantages:
+This project uses PostgreSQL to store workflow data in a relational database, which provides several advantages:
 
-- **Natural representation**: Workflows are inherently graph structures
-- **Efficient queries**: Finding paths and relationships between nodes
-- **Flexibility**: Easy to model complex workflow structures
+- **ACID compliance**: Ensures data consistency and reliability
+- **Mature ecosystem**: Robust tooling and community support
+- **Scalability**: Handles complex queries and large datasets efficiently
+- **JSON support**: Native JSON/JSONB for flexible schema designs
 
-### Setting up Neo4j
+### Setting up PostgreSQL
 
-1. Create a free [Neo4j Aura](https://neo4j.com/cloud/platform/aura-graph-database/) account
-2. Create a new database instance
+1. Install PostgreSQL locally or use a cloud service like [Neon](https://neon.tech/)
+2. Create a new database for the application
 3. Add the connection details to your `.env` file:
    ```
-   NEO4J_URI=neo4j+s://your-instance-id.databases.neo4j.io
-   NEO4J_USERNAME=neo4j
-   NEO4J_PASSWORD=your-password
+   DATABASE_URL=postgresql://username:password@localhost:5432/agentworkflow
+   ```
+
+4. Run database migrations:
+   ```bash
+   npm run db:push
    ```
 
 ## LangGraph & LangSmith

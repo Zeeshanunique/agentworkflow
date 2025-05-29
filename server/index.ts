@@ -1,3 +1,8 @@
+import dotenv from "dotenv";
+
+// Load environment variables first before any other imports
+dotenv.config();
+
 import express from "express";
 import session from "express-session";
 import { createServer } from "http";
@@ -14,7 +19,6 @@ import authRoutes from "./routes/auth";
 import workflowsRoutes from "./routes/workflows";
 import workflowApiRoutes from "./api/workflow";
 import { setupWebSocketServer } from "./utils/websocket";
-import { verifyConnection as verifyNeo4jConnection } from "../src/lib/neo4j";
 import { initLangSmith } from "../src/lib/langchain/langsmith";
 
 // For ESM compatibility
@@ -74,7 +78,7 @@ app.use(passport.session());
 // API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/workflows", workflowsRoutes);
-app.use("/api/neo4j-workflows", workflowApiRoutes);
+app.use("/api/workflows", workflowApiRoutes);
 
 // Static files handling
 if (config.isDev) {
@@ -106,7 +110,7 @@ if (config.isDev) {
               <ul>
                 <li><a href="/api/auth" class="api-link">/api/auth</a> - Authentication endpoints</li>
                 <li><a href="/api/workflows" class="api-link">/api/workflows</a> - Workflow management endpoints</li>
-                <li><a href="/api/neo4j-workflows" class="api-link">/api/neo4j-workflows</a> - Neo4j-based workflow endpoints</li>
+                <li><a href="/api/workflows" class="api-link">/api/workflows</a> - PostgreSQL-based workflow endpoints</li>
               </ul>
             </div>
             <div class="info">
@@ -161,18 +165,8 @@ const startServer = async () => {
     if (config.isDev) {
       await runMigrations();
     }
-    
-    // Initialize LangSmith
+      // Initialize LangSmith
     initLangSmith();
-    
-    // Verify Neo4j connection
-    try {
-      const neo4jConnected = await verifyNeo4jConnection();
-      console.log(`Neo4j connection ${neo4jConnected ? 'successful' : 'failed'}`);
-    } catch (error) {
-      console.warn('Neo4j connection check failed:', error);
-      console.warn('Neo4j features will not be available');
-    }
     
     httpServer.listen(config.port, () => {
       console.log(`Server running on port ${config.port} in ${config.nodeEnv} mode`);

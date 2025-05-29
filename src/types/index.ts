@@ -92,18 +92,8 @@ export interface Workflow {
   isPublic?: boolean;
 }
 
-// Neo4j specific types
-export interface Neo4jWorkflow {
-  id: string;
-  name: string;
-  description: string;
-  userId: string;
-  isPublic: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Neo4jNode {
+// Workflow structure types
+export interface WorkflowNode {
   id: string;
   type: string;
   parameters: Record<string, any>;
@@ -112,7 +102,7 @@ export interface Neo4jNode {
   updatedAt?: string;
 }
 
-export interface Neo4jConnection {
+export interface WorkflowConnection {
   id: string;
   fromNodeId: string;
   toNodeId: string;
@@ -122,8 +112,8 @@ export interface Neo4jConnection {
 }
 
 export interface WorkflowStructure {
-  nodes: Neo4jNode[];
-  connections: Neo4jConnection[];
+  nodes: WorkflowNode[];
+  connections: WorkflowConnection[];
 }
 
 // LangGraph types
