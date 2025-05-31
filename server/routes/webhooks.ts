@@ -3,7 +3,8 @@ import { db } from "../db";
 import { workflows } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { logger } from "../utils/logger";
-import { executeWorkflow } from "../../src/utils/workflowExecutor";
+import { N8nWorkflowExecutor } from "../../src/utils/n8nWorkflowExecutor";
+import { handleWebhookRequest } from "../../src/lib/triggerWorkflowIntegration";
 
 const router = express.Router();
 
@@ -14,15 +15,40 @@ router.all("/webhook/*", async (req, res) => {
     const method = req.method;
     const headers = req.headers;
     const body = req.body;
-    const query = req.query;
-
-    logger.info(`Webhook triggered: ${method} /webhook/${webhookPath}`, {
+    const query = req.query;    logger.info(`Webhook triggered: ${method} /webhook/${webhookPath}`, {
       headers: Object.keys(headers),
       bodyKeys: Object.keys(body || {}),
       queryKeys: Object.keys(query || {})
     });
 
-    // Find workflows that have webhook triggers matching this path
+    // Try to handle with n8n trigger system first
+    const webhookContext = {
+      method,
+      path: webhookPath,
+      body,
+      headers: headers as Record<string, string>,
+      query: query as Record<string, string>,
+      params: req.params as Record<string, string>,
+      baseUrl: `${req.protocol}://${req.get('host')}`
+    };
+
+    const n8nTriggerResult = await handleWebhookRequest(webhookPath, webhookContext);
+    
+    // If handled by n8n trigger system, return its response
+    if (n8nTriggerResult?.triggered) {
+      // If webhook specifies a custom response, use it
+      if (n8nTriggerResult.data && 'responseCode' in n8nTriggerResult.data) {
+        const responseData = n8nTriggerResult.data as any;
+        return res.status(responseData.responseCode || 200).send(responseData.data || 'OK');
+      }
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Webhook processed by n8n trigger system'
+      });
+    }
+
+    // Otherwise fall back to legacy webhook handling
     const allWorkflows = await db.select().from(workflows);
     
     const triggeredWorkflows = allWorkflows.filter(workflow => {
@@ -56,16 +82,23 @@ router.all("/webhook/*", async (req, res) => {
         const webhookNode = nodes.find((node: any) => 
           node.type === "webhook_trigger" && 
           node.parameters?.path === `/${webhookPath}`
-        );        if (!webhookNode) continue;
-
-        // Execute the workflow with webhook data as input
-        const result = await executeWorkflow(nodes, edges);
+        );        if (!webhookNode) continue;        // Execute the workflow with webhook data as input
+        const executionContext = {
+          executionId: `webhook-${workflow.id}-${Date.now()}`,
+          mode: 'webhook' as const,
+          startTime: new Date(),
+          variables: { webhookData: { body, headers, query, path: webhookPath } },
+          credentials: {}
+        };
         
-        results.push({
+        const executor = new N8nWorkflowExecutor(executionContext);
+        executor.loadWorkflow(nodes, edges);
+        const result = await executor.executeWorkflow();
+          results.push({
           workflowId: workflow.id,
           workflowName: workflow.name,
           success: result.success,
-          data: result.results,
+          data: result.data,
           error: result.error
         });
 
@@ -120,21 +153,27 @@ router.post("/webhook/test", async (req, res) => {
     }
 
     const nodes = Array.isArray(workflow.nodes) ? workflow.nodes : [];
-    const edges = Array.isArray(workflow.edges) ? workflow.edges : [];
-
-    // Execute the workflow with test data
-    const result = await executeWorkflow(nodes, edges);
+    const edges = Array.isArray(workflow.edges) ? workflow.edges : [];    // Execute the workflow with test data
+    const executionContext = {
+      executionId: `test-webhook-${workflowId}-${Date.now()}`,
+      mode: 'webhook' as const,
+      startTime: new Date(),
+      variables: { webhookData: { body: req.body, headers: req.headers, test: true } },
+      credentials: {}
+    };
+    
+    const executor = new N8nWorkflowExecutor(executionContext);
+    executor.loadWorkflow(nodes, edges);
+    const result = await executor.executeWorkflow();
 
     logger.info(`Test webhook execution for workflow ${workflowId}`, {
       success: result.success,
       error: result.error
-    });
-
-    res.json({
+    });    res.json({
       message: "Test webhook executed",
       workflowId,
       success: result.success,
-      results: result.results,
+      results: result.data,
       error: result.error
     });
 

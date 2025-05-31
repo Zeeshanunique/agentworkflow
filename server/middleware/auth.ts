@@ -69,3 +69,6 @@ export function isAuthenticated(req: Request, res: Response, next: NextFunction)
   }
   res.status(401).json({ message: "Unauthorized" });
 }
+
+// Export an alias for isAuthenticated for compatibility with our new code
+export const authenticateUser = isAuthenticated;

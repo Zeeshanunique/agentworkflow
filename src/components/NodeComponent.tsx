@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Node, Port, Position } from '../types/workflow';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Settings } from 'lucide-react';
+import { getN8nNodeTypeByType } from '../data/n8nNodeTypes';
+import { renderN8nIcon } from '../data/n8nNodeTypes';
 
 function cn(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(' ');
@@ -14,6 +16,7 @@ export interface NodeComponentProps {
   onPortDragStart: (nodeId: string, portId: string) => void;
   onPortDragEnd: (toNodeId: string, toPortId: string) => void;
   onDelete: () => void;
+  onConfigure?: () => void;
 }
 
 export const NodeComponent: React.FC<NodeComponentProps> = ({
@@ -23,11 +26,15 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
   onMove,
   onPortDragStart,
   onPortDragEnd,
-  onDelete
+  onDelete,
+  onConfigure
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef<{ x: number; y: number } | null>(null);
   const nodeStartPos = useRef<Position | null>(null);
+
+  // Get n8n node type for enhanced display
+  const n8nNodeType = getN8nNodeTypeByType(node.type);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -107,16 +114,38 @@ export const NodeComponent: React.FC<NodeComponentProps> = ({
       onMouseDown={handleMouseDown}
     >
       <div className="flex justify-between items-center mb-2">
-        <h3 className="text-sm font-medium">{node.name}</h3>
-        <button
-          className="p-1 text-gray-500 hover:text-red-500 rounded"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-        >
-          <Trash2 size={16} />
-        </button>
+        <div className="flex items-center gap-2">
+          {n8nNodeType?.icon && (
+            <span className="text-blue-600">
+              {renderN8nIcon(n8nNodeType.icon)}
+            </span>
+          )}
+          <h3 className="text-sm font-medium truncate">{node.name}</h3>
+        </div>
+        <div className="flex items-center gap-1">
+          {onConfigure && (
+            <button
+              className="p-1 text-gray-500 hover:text-blue-500 rounded"
+              onClick={(e) => {
+                e.stopPropagation();
+                onConfigure();
+              }}
+              title="Configure node"
+            >
+              <Settings size={14} />
+            </button>
+          )}
+          <button
+            className="p-1 text-gray-500 hover:text-red-500 rounded"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            title="Delete node"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
 
       <div className="space-y-2">

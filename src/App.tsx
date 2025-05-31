@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Route, Switch, useLocation, Redirect } from "wouter";
 import { useWorkflowStore } from "./hooks/useWorkflowStore";
-import { LoginPage, WorkflowPage, DashboardPage, HomePage } from "./pages";
+import { LoginPage, WorkflowPage, DashboardPage, HomePage, N8nTriggersDemo } from "./pages";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
 import { performanceMonitor } from "./utils/performance";
 import { logger } from "./utils/logger";
@@ -69,6 +69,15 @@ function App() {
             ) : (
               <ErrorBoundary>
                 <WorkflowPage username={user?.username} />
+              </ErrorBoundary>
+            )}
+          </Route>
+          <Route path="/triggers">
+            {!isAuthenticated ? (
+              <Redirect to="/login" />
+            ) : (
+              <ErrorBoundary>
+                <N8nTriggersDemo />
               </ErrorBoundary>
             )}
           </Route>

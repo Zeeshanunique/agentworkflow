@@ -151,6 +151,19 @@ export interface Node {
     outputs?: Port[];
     parameters?: Record<string, any>;
   };
+  // n8n compatibility fields
+  typeVersion?: number;
+  disabled?: boolean;
+  notes?: string;
+  credentials?: Record<string, string>;
+  webhookId?: string;
+  continueOnFail?: boolean;
+  retryOnFail?: boolean;
+  maxTries?: number;
+  waitBetweenTries?: number;
+  name?: string;
+  inputs?: Port[];
+  outputs?: Port[];
 }
 
 export interface Connection {

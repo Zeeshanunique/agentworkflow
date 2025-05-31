@@ -1,6 +1,8 @@
 // filepath: /workspaces/agentworkflow/src/components/PropertiesPanel.tsx
 import React from "react";
 import { Node, Port } from "../types/workflow";
+import { getN8nNodeTypeByType } from "../data/n8nNodeTypes";
+import { renderN8nIcon } from "../data/n8nNodeTypes";
 
 interface PropertiesPanelProps {
   selectedNode: Node | null;
@@ -11,6 +13,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   selectedNode,
   onNodeUpdate,
 }) => {
+  // Get n8n node type for enhanced display
+  const n8nNodeType = selectedNode ? getN8nNodeTypeByType(selectedNode.type) : null;
+
   if (!selectedNode) {
     return (
       <div className="w-64 bg-white border-l p-4">
@@ -46,9 +51,22 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   return (
     <div className="w-64 bg-white border-l p-4">
-      <h3 className="text-lg font-semibold mb-4">Properties</h3>
+      <div className="flex items-center gap-2 mb-4">
+        {n8nNodeType?.icon && (
+          <span className="text-blue-600">
+            {renderN8nIcon(n8nNodeType.icon)}
+          </span>
+        )}
+        <h3 className="text-lg font-semibold">Properties</h3>
+      </div>
 
       <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Node Type</label>
+          <p className="text-sm text-gray-600 mt-1">
+            {(n8nNodeType?.description as any)?.displayName || selectedNode.type}
+          </p>
+        </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Name</label>
           <input

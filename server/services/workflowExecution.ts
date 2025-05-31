@@ -1,5 +1,5 @@
 import { logger } from "../utils/logger";
-import { executeWorkflow } from "../../src/utils/workflowExecutor";
+import { N8nWorkflowExecutor } from "../../src/utils/n8nWorkflowExecutor";
 import { db } from "../db";
 import { workflows } from "../db/schema";
 import { eq } from "drizzle-orm";
@@ -20,7 +20,7 @@ class WorkflowExecutionService {
   private executions: Map<string, WorkflowExecution> = new Map();
 
   constructor() {
-    logger.info("Workflow execution service initialized");
+    logger.info("Workflow execution service initialized with n8n executor");
   }
 
   // Execute a workflow by ID
@@ -43,8 +43,7 @@ class WorkflowExecutionService {
 
     this.executions.set(executionId, execution);
     
-    try {
-      logger.info(`Starting workflow execution ${executionId} for workflow ${workflowId}`);
+    try {      logger.info(`Starting workflow execution ${executionId} for workflow ${workflowId}`);
 
       // Get the workflow from database
       const [workflow] = await db.select().from(workflows).where(eq(workflows.id, workflowId));
@@ -60,13 +59,27 @@ class WorkflowExecutionService {
         throw new Error("Workflow has no nodes to execute");
       }
 
+      // Execute the workflow using n8n executor
+      const n8nExecutor = new N8nWorkflowExecutor({
+        executionId,
+        mode: triggeredBy === "manual" ? "manual" : 
+              triggeredBy === "webhook" ? "webhook" : 
+              triggeredBy === "schedule" ? "schedule" : "manual",
+        startTime: new Date(),
+        variables: input,
+        credentials: {}
+      });
+
+      // Load workflow into executor
+      n8nExecutor.loadWorkflow(nodes, edges);
+      
       // Execute the workflow
-      const result = await executeWorkflow(nodes, edges);
+      const result = await n8nExecutor.executeWorkflow();
 
       // Update execution record
       execution.status = result.success ? "completed" : "failed";
       execution.endTime = new Date();
-      execution.output = result.results;
+      execution.output = result.data;
       execution.error = result.error;
 
       this.executions.set(executionId, execution);
@@ -114,19 +127,31 @@ class WorkflowExecutionService {
     this.executions.set(executionId, execution);
     
     try {
-      logger.info(`Starting direct workflow execution ${executionId}`);
-
-      if (nodes.length === 0) {
+      logger.info(`Starting direct workflow execution ${executionId}`);      if (nodes.length === 0) {
         throw new Error("Workflow has no nodes to execute");
       }
 
+      // Execute the workflow using n8n executor
+      const n8nExecutor = new N8nWorkflowExecutor({
+        executionId,
+        mode: triggeredBy === "manual" ? "manual" : 
+              triggeredBy === "webhook" ? "webhook" : 
+              triggeredBy === "schedule" ? "schedule" : "manual",
+        startTime: new Date(),
+        variables: input,
+        credentials: {}
+      });
+
+      // Load workflow into executor
+      n8nExecutor.loadWorkflow(nodes, edges);
+      
       // Execute the workflow
-      const result = await executeWorkflow(nodes, edges);
+      const result = await n8nExecutor.executeWorkflow();
 
       // Update execution record
       execution.status = result.success ? "completed" : "failed";
       execution.endTime = new Date();
-      execution.output = result.results;
+      execution.output = result.data;
       execution.error = result.error;
 
       this.executions.set(executionId, execution);

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useToast } from "../../components/ToastProvider";
 import { useWorkflowStore } from "../../hooks/useWorkflowStore";
-import { executeWorkflow } from "../../utils/workflowExecutor";
 import { MainLayout } from "../../components/layout";
 import Toolbar from "../../components/Toolbar";
 import CanvasFlow from "../../components/CanvasFlow";
 import { Sidebar } from "../../components/layout";
 import { n8nNodeCategories } from "../../data/n8nNodeTypes";
 import { TriggerConfig } from "../../components/WorkflowTriggers";
+import { N8nWorkflowExecutor } from "../../utils/n8nWorkflowExecutor";
 
 interface WorkflowPageProps {
   username?: string;
@@ -83,15 +83,16 @@ export default function WorkflowPage({
         setNodeStatus(node.id, "running", "Executing...");
       });
 
-      // Use the backend execution API if available, otherwise fall back to local execution
       let result: { success: boolean; results?: any; error?: string } | undefined;
+
       try {
         // First, try to save/update the workflow
         const workflowData = {
-          name: `Workflow ${Date.now()}`,
+          name: workflowName || `Workflow ${Date.now()}`,
+          description: workflowDescription,
           nodes,
           connections,
-          trigger: { type: 'manual' }
+          trigger: workflowTrigger
         };
 
         // Create or update workflow
@@ -105,6 +106,7 @@ export default function WorkflowPage({
 
         if (saveResponse.ok) {
           const savedWorkflow = await saveResponse.json();
+          setWorkflowId(savedWorkflow.id);
           
           // Execute via backend API
           const executeResponse = await fetch(`/api/execution/workflow/${savedWorkflow.id}/execute`, {
@@ -171,10 +173,40 @@ export default function WorkflowPage({
           throw new Error('Failed to save workflow');
         }
       } catch (apiError) {
-        console.warn('Backend execution failed, falling back to local execution:', apiError);
+        console.warn('Backend execution failed, falling back to n8n local execution:', apiError);
         
-        // Fall back to local execution
-        result = await executeWorkflow(nodes, connections);
+        // Fall back to n8n local execution
+        try {
+          const executionContext = {
+            executionId: `exec_${Date.now()}`,
+            mode: 'manual' as const,
+            startTime: new Date(),
+            variables: {},
+            credentials: {}
+          };
+          
+          const n8nExecutor = new N8nWorkflowExecutor(executionContext);
+          n8nExecutor.loadWorkflow(nodes, connections);
+          const n8nResult = await n8nExecutor.executeWorkflow();
+          
+          result = {
+            success: n8nResult.success,
+            results: n8nResult.data,
+            error: n8nResult.error
+          };
+          
+          // Update node statuses from n8n results
+          if (n8nResult.nodeResults) {
+            n8nResult.nodeResults.forEach((nodeResult, nodeId) => {
+              if (nodeResult && nodeResult.length > 0) {
+                setNodeStatus(nodeId, "success", "Completed successfully");
+              }
+            });
+          }
+        } catch (localError) {
+          console.error('Local n8n execution also failed:', localError);
+          result = { success: false, error: 'Both backend and local execution failed' };
+        }
       }
 
       // Update node statuses based on results

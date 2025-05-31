@@ -4,21 +4,15 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { PlayIcon, StopIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { IExecutionResult, IWorkflowBase } from '../types/n8n';
 
-interface Workflow {
-  id: string;
-  name: string;
+interface Workflow extends IWorkflowBase {
   status: 'active' | 'inactive';
   trigger?: {
     type: 'manual' | 'webhook' | 'schedule' | 'api';
     config?: any;
   };
-  lastExecution?: {
-    id: string;
-    status: 'running' | 'completed' | 'failed' | 'cancelled';
-    startTime: string;
-    duration?: number;
-  };
+  lastExecution?: IExecutionResult;
 }
 
 interface ExecutionPanelProps {

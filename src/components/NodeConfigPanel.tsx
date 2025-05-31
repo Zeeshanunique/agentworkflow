@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, ChevronDown, ChevronUp } from 'lucide-react';
 import { Node } from '../types';
 import { getN8nNodeTypeByType } from '../data/n8nNodeTypes';
-import { getNodeTypeByType } from '../data/nodeTypes';
 import { Button } from './ui/button';
+import { INodeProperties } from '../types/n8n';
 
 interface NodeConfigPanelProps {
   node: Node;
@@ -21,10 +21,9 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
   onParametersChange
 }) => {
   const [localParameters, setLocalParameters] = useState<Record<string, any>>(node.parameters || {});
-  const [isMinimized, setIsMinimized] = useState(false);
-
-  // Get node type information
-  const nodeType = getN8nNodeTypeByType(node.type) || getNodeTypeByType(node.type);
+  const [isMinimized, setIsMinimized] = useState(false);  // Get node type information
+  const nodeType = getN8nNodeTypeByType(node.type);
+  const n8nNodeType = getN8nNodeTypeByType(node.type);
 
   useEffect(() => {
     setLocalParameters(node.parameters || {});
@@ -43,6 +42,72 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
 
   const handleSave = () => {
     onParametersChange(localParameters);
+  };
+  // Render n8n property input
+  const renderN8nPropertyInput = (property: INodeProperties) => {
+    const currentValue = localParameters[property.name] !== undefined 
+      ? localParameters[property.name] 
+      : property.default;
+
+    switch (property.type) {
+      case 'string':
+        return (
+          <input
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={String(currentValue || '')}
+            onChange={(e) => handleParameterChange(property.name, e.target.value)}
+            placeholder={property.placeholder}
+          />
+        );
+      
+      case 'number':
+        return (
+          <input
+            type="number"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={Number(currentValue || 0)}
+            onChange={(e) => handleParameterChange(property.name, parseFloat(e.target.value) || 0)}
+            placeholder={property.placeholder}
+          />
+        );
+      
+      case 'boolean':
+        return (
+          <input
+            type="checkbox"
+            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            checked={Boolean(currentValue)}
+            onChange={(e) => handleParameterChange(property.name, e.target.checked)}
+          />
+        );
+      
+      case 'options':
+        return (
+          <select
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={String(currentValue || '')}
+            onChange={(e) => handleParameterChange(property.name, e.target.value)}
+          >
+            {property.options?.map((option) => (
+              <option key={String(option.value)} value={String(option.value)}>
+                {option.name}
+              </option>
+            ))}
+          </select>
+        );
+      
+      default:
+        return (
+          <input
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            value={String(currentValue || '')}
+            onChange={(e) => handleParameterChange(property.name, e.target.value)}
+            placeholder={property.placeholder}
+          />
+        );
+    }
   };
 
   const renderParameterInput = (key: string, value: any, defaultValue: any = '') => {
@@ -153,15 +218,13 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
       />
     );
   };
-
   const formatParameterLabel = (key: string) => {
     return key
       .replace(/([A-Z])/g, ' $1')
       .replace(/^./, str => str.toUpperCase())
       .replace(/_/g, ' ');
-  };
-
-  // Get all available parameters (from defaultParameters and current parameters)
+  };  // Get all available parameters - prefer n8n properties if available
+  const n8nProperties = (n8nNodeType?.description as any)?.properties || [];
   const defaultParams = (nodeType as any).defaultParameters || {};
   const allParameters = { ...defaultParams, ...localParameters };
 
@@ -205,27 +268,45 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
       </div>
 
       {/* Content */}
-      {!isMinimized && (
-        <div className="p-4 max-h-80 overflow-y-auto">
+      {!isMinimized && (        <div className="p-4 max-h-80 overflow-y-auto">
           <div className="space-y-4">
-            {Object.keys(allParameters).length === 0 ? (
+            {Object.keys(allParameters).length === 0 && n8nProperties.length === 0 ? (
               <p className="text-sm text-gray-500 text-center py-4">
                 No configuration parameters available for this node.
               </p>
             ) : (
-              Object.entries(allParameters).map(([key, value]) => (
-                <div key={key} className="space-y-2">
-                  <label className="block text-xs font-medium text-gray-700">
-                    {formatParameterLabel(key)}
-                  </label>
-                  {renderParameterInput(key, localParameters[key], value)}
-                </div>
-              ))
+              <>
+                {/* Render n8n properties first */}
+                {n8nProperties.map((property: INodeProperties) => (
+                  <div key={property.name} className="space-y-2">
+                    <label className="block text-xs font-medium text-gray-700">
+                      {property.displayName}
+                    </label>
+                    {renderN8nPropertyInput(property)}
+                    {property.description && (
+                      <p className="text-xs text-gray-500">{property.description}</p>
+                    )}
+                  </div>
+                ))}
+                
+                {/* Render legacy parameters that don't have n8n equivalents */}
+                {Object.entries(allParameters).map(([key, value]) => {
+                  const hasN8nProperty = n8nProperties.some((prop: INodeProperties) => prop.name === key);
+                  if (hasN8nProperty) return null;
+                  
+                  return (
+                    <div key={key} className="space-y-2">
+                      <label className="block text-xs font-medium text-gray-700">
+                        {formatParameterLabel(key)}
+                      </label>
+                      {renderParameterInput(key, localParameters[key], value)}
+                    </div>
+                  );
+                })}
+              </>
             )}
-          </div>
-
-          {/* Actions */}
-          {Object.keys(allParameters).length > 0 && (
+          </div>          {/* Actions */}
+          {(Object.keys(allParameters).length > 0 || n8nProperties.length > 0) && (
             <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-gray-200">
               <Button variant="outline" size="sm" onClick={onClose}>
                 Cancel

@@ -3,7 +3,8 @@ import { db } from "../db";
 import { workflows } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { logger } from "../utils/logger";
-import { executeWorkflow } from "../../src/utils/workflowExecutor";
+import { N8nWorkflowExecutor } from "../../src/utils/n8nWorkflowExecutor";
+import { registerWorkflowTriggers, unregisterWorkflowTriggers } from "../../src/lib/triggerWorkflowIntegration";
 
 interface ScheduleJob {
   workflowId: string;
@@ -28,7 +29,6 @@ class SchedulerService {
       logger.error("Error starting scheduler service:", error);
     }
   }
-
   // Load all workflows with schedule triggers
   async loadScheduledWorkflows() {
     try {
@@ -36,14 +36,38 @@ class SchedulerService {
       
       for (const workflow of allWorkflows) {
         const nodes = Array.isArray(workflow.nodes) ? workflow.nodes : [];
-        const scheduleNodes = nodes.filter((node: any) => node.type === "schedule_trigger");
         
+        // Handle legacy schedule triggers
+        const scheduleNodes = nodes.filter((node: any) => node.type === "schedule_trigger");
         for (const node of scheduleNodes) {
           await this.addScheduleJob(workflow.id, node.id, node.parameters?.rule || "0 9 * * 1-5");
         }
+        
+        // Handle n8n trigger nodes
+        const n8nTriggerNodes = nodes.filter((node: any) => {
+          // Check if this is an n8n node with trigger property
+          return node.type?.includes('n8n-nodes-base') && (
+            node.type?.includes('Trigger') || 
+            node.properties?.trigger === true
+          );
+        });
+        
+        if (n8nTriggerNodes.length > 0) {
+          logger.info(`Found ${n8nTriggerNodes.length} n8n trigger nodes for workflow ${workflow.id}`);
+          
+          // Convert to trigger registration format
+          const triggerConfigs = n8nTriggerNodes.map(node => ({
+            nodeId: node.id,
+            type: node.type,
+            parameters: node.parameters || {}
+          }));
+          
+          // Register with trigger discovery service
+          await registerWorkflowTriggers(workflow.id, triggerConfigs);
+        }
       }
 
-      logger.info(`Loaded ${this.jobs.size} scheduled workflows`);
+      logger.info(`Loaded ${this.jobs.size} legacy scheduled workflows and registered n8n triggers`);
     } catch (error) {
       logger.error("Error loading scheduled workflows:", error);
     }
@@ -124,8 +148,18 @@ class SchedulerService {
       }      const nodes = Array.isArray(workflow.nodes) ? workflow.nodes : [];
       const edges = Array.isArray(workflow.edges) ? workflow.edges : [];
 
-      // Execute the workflow
-      const result = await executeWorkflow(nodes, edges);
+      // Execute the workflow using N8n executor
+      const executionContext = {
+        executionId: `scheduled-${workflowId}-${Date.now()}`,
+        mode: 'schedule' as const,
+        startTime: new Date(),
+        variables: {},
+        credentials: {}
+      };
+      
+      const executor = new N8nWorkflowExecutor(executionContext);
+      executor.loadWorkflow(nodes, edges);
+      const result = await executor.executeWorkflow();
 
       if (result.success) {
         logger.info(`Scheduled workflow ${workflowId} executed successfully`);
@@ -154,16 +188,24 @@ class SchedulerService {
 
     return jobs;
   }
-
   // Stop all jobs
   stop() {
+    // Stop legacy cron jobs
     for (const job of this.jobs.values()) {
       job.task.stop();
       job.task.destroy();
     }
     
     this.jobs.clear();
-    logger.info("Scheduler service stopped");
+    
+    // Clean up all n8n trigger registrations
+    try {
+      unregisterWorkflowTriggers('*'); // Special value to unregister all
+    } catch (error) {
+      logger.error("Error cleaning up n8n triggers:", error);
+    }
+    
+    logger.info("Scheduler service stopped and all triggers unregistered");
   }
 
   // Refresh schedules (reload from database)

@@ -19,6 +19,7 @@ import workflowsRoutes from "./routes/workflows";
 import webhookRoutes from "./routes/webhooks";
 import executionRoutes from "./routes/execution";
 import workflowApiRoutes from "./api/workflow";
+import n8nExecutionRoutes from "./api/n8n-execution";
 import { setupWebSocketServer } from "./utils/websocket";
 import { initLangSmith } from "./lib/langsmith";
 import { schedulerService } from "./services/scheduler";
@@ -79,6 +80,7 @@ app.use("/api/auth", authRoutes);
 app.use("/workflows", workflowsRoutes);
 app.use("/api/workflows", workflowApiRoutes);
 app.use("/api/execution", executionRoutes);
+app.use("/api/n8n", n8nExecutionRoutes);
 app.use("/", webhookRoutes); // Webhook routes at root level
 app.post("/api/metrics", handleMetrics);
 

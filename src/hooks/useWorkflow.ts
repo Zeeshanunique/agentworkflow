@@ -2,6 +2,8 @@ import { useState, useCallback } from "react";
 import { Node, Edge, Position } from "../types/workflow";
 import { v4 as uuidv4 } from "uuid";
 import { getN8nNodeTypeByType } from "../data/n8nNodeTypes";
+import { getNodeDescription, createNodeInstance } from "../data/n8nNodeRegistry";
+import { createWorkflowExecutor, IWorkflowExecutionContext, IExecutionResult } from "../utils/n8nWorkflowExecutor";
 import OpenAI from "openai";
 
 interface UseWorkflowReturn {
@@ -177,15 +179,62 @@ export function useWorkflow(): UseWorkflowReturn {
   const runWorkflow = useCallback(async () => {
     setIsRunning(true);
     try {
-      // Find output nodes (nodes with no outgoing connections)
-      const outputNodes = nodes.filter(
-        (node) => !edges.some((conn) => conn.source === node.id),
-      );
+      // Convert workflow types to n8n format
+      const n8nNodes = nodes.map(node => ({
+        id: node.id,
+        type: node.type,
+        position: node.position,
+        parameters: node.parameters,
+        data: {
+          name: node.name,
+          description: node.description,
+          inputs: node.inputs,
+          outputs: node.outputs
+        }
+      }));
 
-      // Execute each output node
-      for (const node of outputNodes) {
-        await getNodeValue(node.id);
+      const n8nConnections = edges.map(edge => ({
+        id: edge.id,
+        fromNodeId: edge.source,
+        fromPortId: edge.sourcePort,
+        toNodeId: edge.target,
+        toPortId: edge.targetPort
+      }));
+
+      // Create execution context
+      const executionContext: IWorkflowExecutionContext = {
+        executionId: `exec_${Date.now()}`,
+        mode: 'manual',
+        startTime: new Date(),
+        variables: {},
+        credentials: {
+          // Add any credentials here
+          openai: {
+            apiKey: await getApiKey()
+          }
+        }
+      };
+
+      // Execute workflow using n8n-style executor
+      const executor = createWorkflowExecutor(executionContext);
+      executor.loadWorkflow(n8nNodes, n8nConnections);
+      
+      const result: IExecutionResult = await executor.executeWorkflow();
+      
+      if (result.success) {
+        console.log('Workflow executed successfully:', result);
+        // Handle successful execution
+        if (result.nodeResults) {
+          for (const [nodeId, nodeData] of result.nodeResults) {
+            console.log(`Node ${nodeId} result:`, nodeData);
+            // Update node status or handle results as needed
+          }
+        }
+      } else {
+        console.error('Workflow execution failed:', result.error);
+        throw new Error(result.error);
       }
+
     } catch (error) {
       console.error("Workflow execution error:", error);
     } finally {
