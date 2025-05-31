@@ -1,7 +1,7 @@
 import { ReactNode, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
-import { nodeCategories } from "../../data/nodeTypes";
+import { n8nNodeCategories } from "../../data/n8nNodeTypes";
 
 type WorkflowLayoutProps = {
   children: ReactNode;
@@ -37,7 +37,7 @@ export default function WorkflowLayout({
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
           isOpen={sidebarOpen}
-          nodeCategories={nodeCategories}
+          nodeCategories={n8nNodeCategories}
           onNodeAdd={handleNodeAdd}
         />
         <main className="flex-1 overflow-y-auto">{children}</main>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Menu, Settings, User, LogOut, Save, Plus } from "lucide-react";
+import { Menu, Settings, LogOut, Save} from "lucide-react";
 import { Button } from "./ui/button";
 import { authApi } from "../lib/api";
 import { useToast } from "./ToastProvider";

@@ -6,7 +6,7 @@ import { MainLayout } from "../../components/layout";
 import Toolbar from "../../components/Toolbar";
 import CanvasFlow from "../../components/CanvasFlow";
 import { Sidebar } from "../../components/layout";
-import { nodeCategories } from "../../data/nodeTypes";
+import { n8nNodeCategories } from "../../data/n8nNodeTypes";
 
 interface WorkflowPageProps {
   username?: string;
@@ -153,7 +153,7 @@ export default function WorkflowPage({
         {/* Render the sidebar outside the main content flow due to its fixed positioning */}
         <Sidebar 
           isOpen={sidebarOpen}
-          nodeCategories={nodeCategories}
+          nodeCategories={n8nNodeCategories}
           onNodeAdd={handleAddNode}
         />
 

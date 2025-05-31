@@ -8,7 +8,6 @@ import session from "express-session";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import path from "path";
-import { fileURLToPath } from "url";
 import pgSession from "connect-pg-simple";
 import MemoryStore from "memorystore";
 import cors from "cors";
@@ -19,11 +18,8 @@ import authRoutes from "./routes/auth";
 import workflowsRoutes from "./routes/workflows";
 import workflowApiRoutes from "./api/workflow";
 import { setupWebSocketServer } from "./utils/websocket";
-import { initLangSmith } from "../src/lib/langchain/langsmith";
-
-// For ESM compatibility
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { initLangSmith } from "./lib/langsmith";
+import { handleMetrics } from "./api/metrics";
 
 // Initialize Express app
 const app = express();
@@ -77,13 +73,14 @@ app.use(passport.session());
 
 // API routes
 app.use("/api/auth", authRoutes);
-app.use("/api/workflows", workflowsRoutes);
+app.use("/workflows", workflowsRoutes);
 app.use("/api/workflows", workflowApiRoutes);
+app.post("/api/metrics", handleMetrics);
 
 // Static files handling
 if (config.isDev) {
   // In development mode, add a simple route for the root path
-  app.get("/", (req, res) => {
+  app.get("/", (_, res) => {
     res.send(`
       <!DOCTYPE html>
       <html>

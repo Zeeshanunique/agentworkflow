@@ -1,5 +1,6 @@
 import { Node, Connection } from "../types";
 import { executeAgentTask, AgentType } from "../lib/agents";
+import { getN8nNodeTypeByType } from "../data/n8nNodeTypes";
 
 /**
  * Sort nodes in topological order for execution

@@ -1,35 +1,50 @@
 import { useState, useCallback } from "react";
-import { Node, Connection, Position, NodeType } from "../types";
+import { Node, Edge, Position } from "../types/workflow";
 import { v4 as uuidv4 } from "uuid";
-import { getNodeTypeByType } from "../data/nodeTypes";
+import { getN8nNodeTypeByType } from "../data/n8nNodeTypes";
 import OpenAI from "openai";
 
-export const useWorkflow = () => {
+interface UseWorkflowReturn {
+  nodes: Node[];
+  edges: Edge[];
+  selectedNodeId: string | null;
+  selectedNode: Node | null;
+  isRunning: boolean;
+  addNode: (type: string, position: Position) => void;
+  updateNode: (nodeId: string, updates: Partial<Node>) => void;
+  deleteNode: (nodeId: string) => void;
+  selectNode: (nodeId: string | null) => void;
+  moveNode: (nodeId: string, position: Position) => void;
+  addEdge: (sourceNodeId: string, sourcePortId: string, targetNodeId: string, targetPortId: string) => void;
+  deleteEdge: (edgeId: string) => void;
+  clearWorkflow: () => void;
+  runWorkflow: () => void;
+}
+
+export function useWorkflow(): UseWorkflowReturn {
   const [nodes, setNodes] = useState<Node[]>([]);
-  const [connections, setConnections] = useState<Connection[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
 
   const selectedNode = selectedNodeId
-    ? nodes.find((node) => node.id === selectedNodeId)
+    ? nodes.find((node) => node.id === selectedNodeId) ?? null
     : null;
 
   const addNode = useCallback(
-    (nodeType: string, position: Position = { x: 100, y: 100 }) => {
-      const nodeTypeData = getNodeTypeByType(nodeType);
-      if (!nodeTypeData) return;
+    (type: string, position: Position) => {
+      const nodeType = getN8nNodeTypeByType(type);
+      if (!nodeType) return;
 
       const newNode: Node = {
         id: uuidv4(),
-        name: nodeTypeData.name,
-        description: nodeTypeData.description,
+        name: nodeType.name,
+        type: type,
+        description: nodeType.description,
         position,
-        nodeType: nodeTypeData,
-        inputs: nodeTypeData.inputs,
-        outputs: nodeTypeData.outputs,
-        parameters: nodeTypeData.defaultParameters
-          ? { ...nodeTypeData.defaultParameters }
-          : {},
+        inputs: nodeType.inputs,
+        outputs: nodeType.outputs,
+        parameters: nodeType.defaultParameters || {}
       };
 
       setNodes((prev) => [...prev, newNode]);
@@ -46,71 +61,54 @@ export const useWorkflow = () => {
     );
   }, []);
 
+  const deleteNode = useCallback((nodeId: string) => {
+    setNodes((prev) => prev.filter((node) => node.id !== nodeId));
+    setEdges((prev) => prev.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
+    if (selectedNodeId === nodeId) {
+      setSelectedNodeId(null);
+    }
+  }, [selectedNodeId]);
+
+  const selectNode = useCallback((nodeId: string | null) => {
+    setSelectedNodeId(nodeId);
+  }, []);
+
   const moveNode = useCallback((nodeId: string, position: Position) => {
     setNodes((prev) =>
       prev.map((node) => (node.id === nodeId ? { ...node, position } : node)),
     );
   }, []);
 
-  const removeNode = useCallback(
-    (nodeId: string) => {
-      setNodes((prev) => prev.filter((node) => node.id !== nodeId));
+  const addEdge = useCallback((sourceNodeId: string, sourcePortId: string, targetNodeId: string, targetPortId: string) => {
+    if (sourceNodeId === targetNodeId) return;
 
-      // Remove connections associated with this node
-      setConnections((prev) =>
-        prev.filter(
-          (conn) => conn.fromNodeId !== nodeId && conn.toNodeId !== nodeId,
-        ),
-      );
+    const existingEdge = edges.find(
+      (edge) =>
+        edge.source === sourceNodeId &&
+        edge.sourcePort === sourcePortId &&
+        edge.target === targetNodeId &&
+        edge.targetPort === targetPortId
+    );
 
-      if (selectedNodeId === nodeId) {
-        setSelectedNodeId(null);
-      }
-    },
-    [selectedNodeId],
-  );
+    if (existingEdge) return;
 
-  const connectNodes = useCallback(
-    (
-      fromNodeId: string,
-      fromPortId: string,
-      toNodeId: string,
-      toPortId: string,
-    ) => {
-      // Prevent connecting a node to itself
-      if (fromNodeId === toNodeId) return;
+    const newEdge: Edge = {
+      id: uuidv4(),
+      source: sourceNodeId,
+      sourcePort: sourcePortId,
+      target: targetNodeId,
+      targetPort: targetPortId
+    };
+    setEdges((prev) => [...prev, newEdge]);
+  }, [edges]);
 
-      // Prevent duplicate connections
-      const existingConnection = connections.find(
-        (conn) =>
-          conn.fromNodeId === fromNodeId &&
-          conn.fromPortId === fromPortId &&
-          conn.toNodeId === toNodeId &&
-          conn.toPortId === toPortId,
-      );
-
-      if (existingConnection) return;
-
-      const newConnection: Connection = {
-        id: uuidv4(),
-        fromNodeId,
-        fromPortId,
-        toNodeId,
-        toPortId,
-      };
-
-      setConnections((prev) => [...prev, newConnection]);
-    },
-    [connections],
-  );
-
-  const removeConnection = useCallback((connectionId: string) => {
-    setConnections((prev) => prev.filter((conn) => conn.id !== connectionId));
+  const deleteEdge = useCallback((edgeId: string) => {
+    setEdges((prev) => prev.filter((edge) => edge.id !== edgeId));
   }, []);
 
   const clearWorkflow = useCallback(() => {
     setNodes([]);
-    setConnections([]);
+    setEdges([]);
     setSelectedNodeId(null);
   }, []);
 
@@ -121,16 +119,20 @@ export const useWorkflow = () => {
     // Get input values
     const inputValues: Record<string, any> = {};
     for (const input of node.inputs) {
-      const connection = connections.find(
-        (c) => c.toNodeId === nodeId && c.toPortId === input.id,
+      const connection = edges.find(
+        (c) => c.target === nodeId && c.targetPort === input.id,
       );
       if (connection) {
-        inputValues[input.id] = await getNodeValue(connection.fromNodeId);
+        inputValues[input.id] = await getNodeValue(connection.source);
       }
     }
 
+    // Get node type
+    const nodeType = getNodeTypeByType(node.type);
+    if (!nodeType) return null;
+
     // Process node based on type
-    switch (node.nodeType.type) {
+    switch (nodeType.type) {
       case "openai_key":
         return node.parameters?.apiKey;
 
@@ -155,7 +157,7 @@ export const useWorkflow = () => {
           model: node.parameters?.model || "dall-e-3",
           size: node.parameters?.size || "1024x1024",
         });
-        return image.data[0].url;
+        return image.data?.[0]?.url;
 
       // Add more node type handlers here
 
@@ -165,7 +167,10 @@ export const useWorkflow = () => {
   };
 
   const getApiKey = async (): Promise<string | null> => {
-    const keyNode = nodes.find((n) => n.nodeType.type === "openai_key");
+    const keyNode = nodes.find((n) => {
+      const nodeType = getNodeTypeByType(n.type);
+      return nodeType?.type === "openai_key";
+    });
     return keyNode?.parameters?.apiKey || null;
   };
 
@@ -174,7 +179,7 @@ export const useWorkflow = () => {
     try {
       // Find output nodes (nodes with no outgoing connections)
       const outputNodes = nodes.filter(
-        (node) => !connections.some((conn) => conn.fromNodeId === node.id),
+        (node) => !edges.some((conn) => conn.source === node.id),
       );
 
       // Execute each output node
@@ -186,22 +191,22 @@ export const useWorkflow = () => {
     } finally {
       setIsRunning(false);
     }
-  }, [nodes, connections]);
+  }, [nodes, edges]);
 
   return {
     nodes,
-    connections,
+    edges,
     selectedNodeId,
     selectedNode,
     isRunning,
     addNode,
     updateNode,
+    deleteNode,
+    selectNode,
     moveNode,
-    removeNode,
-    connectNodes,
-    removeConnection,
+    addEdge,
+    deleteEdge,
     clearWorkflow,
     runWorkflow,
-    setSelectedNodeId,
   };
-};
+}

@@ -5,14 +5,6 @@ import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 
-// Define User interface for type safety
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  // Add other user properties as needed
-}
-
 // Extend Express Request type
 declare global {
   namespace Express {
@@ -20,7 +12,6 @@ declare global {
       id: number;
       username: string;
       email: string;
-      // Add other user properties as needed
     }
   }
 }
@@ -44,14 +35,13 @@ const workflowSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
   nodes: z.array(z.any()).or(z.object({})),
-  connections: z.array(z.any()).or(z.object({})),
+  edges: z.array(z.any()).or(z.object({})),
   isPublic: z.boolean().optional()
 });
 
 // Get all workflows for the current user
 router.get("/", isAuthenticated, async (req, res, next) => {
   try {
-    // TypeScript now knows req.user exists because of isAuthenticated middleware
     const userId = req.user!.id;
     
     const userWorkflows = await db.query.workflows.findMany({
@@ -66,7 +56,7 @@ router.get("/", isAuthenticated, async (req, res, next) => {
 });
 
 // Get public workflows
-router.get("/public", async (req, res, next) => {
+router.get("/public", async (_req, res, next) => {
   try {
     const publicWorkflows = await db.query.workflows.findMany({
       where: eq(workflows.isPublic, true),
@@ -115,7 +105,7 @@ router.post("/", isAuthenticated, async (req, res, next) => {
       return res.status(400).json({ error: validationError.message });
     }
     
-    const { name, description, nodes, connections, isPublic = false } = result.data;
+    const { name, description, nodes, edges, isPublic = false } = result.data;
     
     // Create the workflow
     const [newWorkflow] = await db.insert(workflows).values({
@@ -123,7 +113,7 @@ router.post("/", isAuthenticated, async (req, res, next) => {
       description,
       userId,
       nodes,
-      connections,
+      edges,
       isPublic
     }).returning();
     
@@ -158,7 +148,7 @@ router.put("/:id", isAuthenticated, async (req, res, next) => {
       return res.status(400).json({ error: validationError.message });
     }
     
-    const { name, description, nodes, connections, isPublic = false } = result.data;
+    const { name, description, nodes, edges, isPublic = false } = result.data;
     
     // Update the workflow
     const [updatedWorkflow] = await db.update(workflows)
@@ -166,7 +156,7 @@ router.put("/:id", isAuthenticated, async (req, res, next) => {
         name,
         description,
         nodes,
-        connections,
+        edges,
         isPublic,
         updatedAt: new Date()
       })

@@ -4,6 +4,7 @@ import { db } from "../db";
 import { eq } from "drizzle-orm";
 import { users } from "../db/schema";
 import bcrypt from "bcryptjs";
+import { Request, Response, NextFunction } from "express";
 
 export function setupPassport() {
   // Configure passport to use local strategy
@@ -60,4 +61,11 @@ export function setupPassport() {
   });
 
   return passport;
+}
+
+export function isAuthenticated(req: Request, res: Response, next: NextFunction) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ message: "Unauthorized" });
 }

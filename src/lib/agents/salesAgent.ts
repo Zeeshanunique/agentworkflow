@@ -1,9 +1,9 @@
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatOpenAI } from "langchain/chat_models/openai";
 import { Tool } from "@langchain/core/tools";
 import { AgentExecutor, createOpenAIFunctionsAgent } from "langchain/agents";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { RunnableSequence } from "@langchain/core/runnables";
-import { HumanMessage } from "@langchain/core/messages";
+import { HumanMessage } from "langchain/schema";
+
 import { initLangSmith } from "../langchain/langsmith";
 
 // Initialize LangSmith for tracing

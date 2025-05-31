@@ -1,21 +1,20 @@
 import React from "react";
+import { useLocation } from "wouter";
+import { useWorkflowStore } from "../../hooks/useWorkflowStore";
+import { Button } from "../ui/button";
+import { authApi } from "../../lib/api";
 import {
   Menu,
   Settings,
-  User,
   LogOut,
   Save,
-  Plus,
-  Home,
+
   LayoutDashboard,
   GitBranch,
 } from "lucide-react";
-import { Button } from "../ui/button";
-import { authApi } from "../../lib/api";
 import { useToast } from "../ToastProvider";
-import { Link, useLocation } from "wouter";
+
 import { ThemeToggle } from "../ThemeToggle";
-import { useWorkflowStore } from "../../hooks/useWorkflowStore";
 
 interface HeaderProps {
   toggleSidebar?: () => void;

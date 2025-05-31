@@ -31,10 +31,9 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 interface AuthFormProps {
-  className?: string;
 }
 
-const AuthForm: React.FC<AuthFormProps> = ({ className }) => {
+const AuthForm: React.FC<AuthFormProps> = () => {
   const [, navigate] = useLocation();
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState<string | null>(null);
