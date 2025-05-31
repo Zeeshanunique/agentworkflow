@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import ReactFlow, {
   Background,
   Controls,
@@ -15,6 +15,7 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { Node, Connection, Position } from "../types";
 import CustomNode from "./CustomNode";
+import NodeConfigPanel from "./NodeConfigPanel";
 import { NodeStatusType } from "./NodeStatus";
 import { Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
@@ -55,6 +56,8 @@ const Canvas: React.FC<CanvasProps> = ({
   nodeStatuses = {},
   onNodeDelete,
 }) => {
+  const [showConfigPanel, setShowConfigPanel] = useState(false);
+  const [configPanelPosition, setConfigPanelPosition] = useState({ x: 0, y: 0 });
   // Convert our nodes to ReactFlow nodes
   const initialNodes: ReactFlowNode[] = useMemo(() => {
     return nodes.map((node) => {
@@ -71,6 +74,12 @@ const Canvas: React.FC<CanvasProps> = ({
             parameters: Record<string, string>,
           ) => {
             onNodeParametersChange(nodeId, parameters);
+          },
+          onConfigPanelOpen: (nodeId: string, position: { x: number; y: number }) => {
+            if (nodeId === selectedNodeId) {
+              setConfigPanelPosition(position);
+              setShowConfigPanel(true);
+            }
           },
           status: nodeStatus.status,
           statusMessage: nodeStatus.message,
@@ -109,9 +118,21 @@ const Canvas: React.FC<CanvasProps> = ({
   // Handle node selection
   const handleNodeClick: NodeMouseHandler = useCallback(
     (_, node) => {
-      onNodeSelect(node.id);
+      if (selectedNodeId === node.id) {
+        // If clicking on already selected node, open config panel
+        const nodeElement = document.querySelector(`[data-id="${node.id}"]`);
+        if (nodeElement) {
+          const rect = nodeElement.getBoundingClientRect();
+          setConfigPanelPosition({ x: rect.left, y: rect.top });
+          setShowConfigPanel(true);
+        }
+      } else {
+        // Select the node and close config panel
+        onNodeSelect(node.id);
+        setShowConfigPanel(false);
+      }
     },
-    [onNodeSelect],
+    [onNodeSelect, selectedNodeId],
   );
 
   // Handle node movement
@@ -145,6 +166,7 @@ const Canvas: React.FC<CanvasProps> = ({
   // Handle canvas click (deselect nodes)
   const handlePaneClick = useCallback(() => {
     onNodeSelect(null);
+    setShowConfigPanel(false);
   }, [onNodeSelect]);
 
   // Handle node deletion
@@ -205,6 +227,20 @@ const Canvas: React.FC<CanvasProps> = ({
           </Panel>
         )}
       </ReactFlow>
+
+      {/* Node Configuration Panel */}
+      {selectedNodeId && showConfigPanel && (
+        <NodeConfigPanel
+          node={nodes.find(n => n.id === selectedNodeId)!}
+          isVisible={showConfigPanel}
+          position={configPanelPosition}
+          onClose={() => setShowConfigPanel(false)}
+          onParametersChange={(parameters) => {
+            onNodeParametersChange(selectedNodeId, parameters);
+            setShowConfigPanel(false);
+          }}
+        />
+      )}
     </div>
   );
 };

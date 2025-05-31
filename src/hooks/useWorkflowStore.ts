@@ -3,6 +3,7 @@ import { immer } from "zustand/middleware/immer";
 import { persist } from "zustand/middleware";
 import type { Node, Connection, Position, NodeType } from "../types";
 import { getNodeTypeByType } from "../data/nodeTypes";
+import { getN8nNodeTypeByType } from "../data/n8nNodeTypes";
 import { v4 as uuidv4 } from "uuid";
 import { NodeStatusType } from "../components/NodeStatus";
 
@@ -115,23 +116,28 @@ export const useWorkflowStore = create<WorkflowState>()(
         const nodeId = uuidv4();
 
         set((state) => {
-          const nodeTypeData = getNodeTypeByType(nodeType);
-          if (!nodeTypeData) return;
+          // Try to get node type from either n8n types or basic types
+          const nodeTypeData = getN8nNodeTypeByType(nodeType) || getNodeTypeByType(nodeType);
+          if (!nodeTypeData) {
+            console.error(`Node type '${nodeType}' not found in either n8n or basic node types`);
+            return;
+          }
 
           // Convert from nodeTypes format to expected NodeType format
           const compatibleNodeType: NodeType = {
             type: nodeTypeData.type,
             name: nodeTypeData.name,
             description: nodeTypeData.description,
-            category: 'general', // Default category
-            icon: 'settings' as any, // Default icon
-            colorClass: nodeTypeData.colorClass || 'bg-gray-500/20',
+            category: (nodeTypeData as any).category || 'general',
+            icon: nodeTypeData.icon || 'settings' as any,
+            colorClass: (nodeTypeData as any).colorClass || 'bg-gray-500/20',
             inputs: nodeTypeData.inputs,
             outputs: nodeTypeData.outputs,
-            defaultParameters: nodeTypeData.parameters?.reduce((acc, param) => {
-              acc[param.name] = param.default || '';
-              return acc;
-            }, {} as Record<string, string>) || {}
+            defaultParameters: (nodeTypeData as any).defaultParameters || 
+              ((nodeTypeData as any).parameters?.reduce((acc: any, param: any) => {
+                acc[param.name] = param.default || '';
+                return acc;
+              }, {} as Record<string, string>)) || {}
           };
 
           state.nodes.push({

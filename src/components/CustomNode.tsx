@@ -4,6 +4,7 @@ import NodeConfigModal from "./NodeConfigModal";
 import { Handle, Position, NodeProps } from "reactflow";
 import { Node as WorkflowNode } from "../types/workflow";
 import { renderN8nIcon, getN8nNodeTypeByType } from "../data/n8nNodeTypes";
+import { renderIcon, getNodeTypeByType } from "../data/nodeTypes";
 import NodeStatus, { NodeStatusType } from "./NodeStatus";
 
 interface CustomNodeData {
@@ -12,6 +13,7 @@ interface CustomNodeData {
     nodeId: string,
     parameters: Record<string, any>,
   ) => void;
+  onConfigPanelOpen: (nodeId: string, position: { x: number; y: number }) => void;
   status?: NodeStatusType;
   statusMessage?: string;
 }
@@ -21,11 +23,11 @@ const CustomNode = ({
   selected,
   isConnectable,
 }: NodeProps<CustomNodeData>) => {
-  const { node, onParametersChange, status = "idle", statusMessage } = data;
+  const { node, onParametersChange, onConfigPanelOpen, status = "idle", statusMessage } = data;
   const [configModalOpen, setConfigModalOpen] = useState(false);
 
-  // Get node type information
-  const nodeType = getN8nNodeTypeByType(node.type);
+  // Get node type information from either n8n types or basic types
+  const nodeType = getN8nNodeTypeByType(node.type) || getNodeTypeByType(node.type);
   if (!nodeType) {
     return <div>Invalid node type</div>;
   }
@@ -59,14 +61,29 @@ const CustomNode = ({
         <div className="flex items-center justify-between gap-2 mb-1">
           <div className="flex items-center gap-2">
             <div className="flex-shrink-0">
-              {icon ? renderN8nIcon(icon) : null}
+              {icon ? (
+                typeof icon === 'function' ? 
+                  icon({ size: 16 }) : 
+                  renderN8nIcon(icon) || renderIcon(icon)
+              ) : null}
             </div>
             <div className="text-sm font-medium">{node.name}</div>
           </div>
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setConfigModalOpen(true);
+              // Get the node element position for config panel positioning
+              const nodeElement = e.currentTarget.closest('.react-flow__node');
+              if (nodeElement && onConfigPanelOpen) {
+                const rect = nodeElement.getBoundingClientRect();
+                onConfigPanelOpen(node.id, {
+                  x: rect.left,
+                  y: rect.top
+                });
+              } else {
+                // Fallback to modal if positioning fails
+                setConfigModalOpen(true);
+              }
             }}
             className="p-1 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center relative"
             title="Configure node"
