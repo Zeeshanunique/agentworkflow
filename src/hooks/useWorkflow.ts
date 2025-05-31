@@ -128,7 +128,7 @@ export function useWorkflow(): UseWorkflowReturn {
     }
 
     // Get node type
-    const nodeType = getNodeTypeByType(node.type);
+    const nodeType = getN8nNodeTypeByType(node.type);
     if (!nodeType) return null;
 
     // Process node based on type
@@ -168,7 +168,7 @@ export function useWorkflow(): UseWorkflowReturn {
 
   const getApiKey = async (): Promise<string | null> => {
     const keyNode = nodes.find((n) => {
-      const nodeType = getNodeTypeByType(n.type);
+      const nodeType = getN8nNodeTypeByType(n.type);
       return nodeType?.type === "openai_key";
     });
     return keyNode?.parameters?.apiKey || null;

@@ -86,7 +86,6 @@ import {
   Server,
   HardDrive,
   Cpu,
-  Memory,
   Monitor,
   Smartphone,
   Tablet,

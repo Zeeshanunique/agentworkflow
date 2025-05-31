@@ -82,11 +82,9 @@ import {
   EyeOff,
   Lock,
   Unlock,
-  Shield,
-  Server,
+  Shield,  Server,
   HardDrive,
   Cpu,
-  Memory,
   Monitor,
   Smartphone,
   Tablet,
@@ -1264,9 +1262,8 @@ export const renderN8nIcon = (type: NodeIconType): React.ReactNode => {
     case "hard-drive":
       return <HardDrive size={16} color="white" />;
     case "cpu":
-      return <Cpu size={16} color="white" />;
-    case "memory":
-      return <Memory size={16} color="white" />;
+      return <Cpu size={16} color="white" />;    case "memory":
+      return <HardDrive size={16} color="white" />;
     case "monitor":
       return <Monitor size={16} color="white" />;
     case "smartphone":

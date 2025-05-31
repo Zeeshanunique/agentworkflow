@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { persist } from "zustand/middleware";
-import type { Node, Connection, Position } from "../types";
+import type { Node, Connection, Position, NodeType } from "../types";
 import { getNodeTypeByType } from "../data/nodeTypes";
 import { v4 as uuidv4 } from "uuid";
 import { NodeStatusType } from "../components/NodeStatus";
@@ -118,17 +118,31 @@ export const useWorkflowStore = create<WorkflowState>()(
           const nodeTypeData = getNodeTypeByType(nodeType);
           if (!nodeTypeData) return;
 
+          // Convert from nodeTypes format to expected NodeType format
+          const compatibleNodeType: NodeType = {
+            type: nodeTypeData.type,
+            name: nodeTypeData.name,
+            description: nodeTypeData.description,
+            category: 'general', // Default category
+            icon: 'settings' as any, // Default icon
+            colorClass: nodeTypeData.colorClass || 'bg-gray-500/20',
+            inputs: nodeTypeData.inputs,
+            outputs: nodeTypeData.outputs,
+            defaultParameters: nodeTypeData.parameters?.reduce((acc, param) => {
+              acc[param.name] = param.default || '';
+              return acc;
+            }, {} as Record<string, string>) || {}
+          };
+
           state.nodes.push({
             id: nodeId,
             type: nodeTypeData.type,
             position,
-            parameters: nodeTypeData.defaultParameters
-              ? { ...nodeTypeData.defaultParameters }
-              : {},
+            parameters: compatibleNodeType.defaultParameters,
             data: {
               name: nodeTypeData.name,
               description: nodeTypeData.description,
-              nodeType: nodeTypeData,
+              nodeType: compatibleNodeType,
               inputs: nodeTypeData.inputs,
               outputs: nodeTypeData.outputs,
             },

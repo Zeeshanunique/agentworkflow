@@ -16,9 +16,12 @@ import { db, runMigrations } from "./db";
 import { setupPassport } from "./middleware/auth";
 import authRoutes from "./routes/auth";
 import workflowsRoutes from "./routes/workflows";
+import webhookRoutes from "./routes/webhooks";
+import executionRoutes from "./routes/execution";
 import workflowApiRoutes from "./api/workflow";
 import { setupWebSocketServer } from "./utils/websocket";
 import { initLangSmith } from "./lib/langsmith";
+import { schedulerService } from "./services/scheduler";
 import { handleMetrics } from "./api/metrics";
 
 // Initialize Express app
@@ -75,6 +78,8 @@ app.use(passport.session());
 app.use("/api/auth", authRoutes);
 app.use("/workflows", workflowsRoutes);
 app.use("/api/workflows", workflowApiRoutes);
+app.use("/api/execution", executionRoutes);
+app.use("/", webhookRoutes); // Webhook routes at root level
 app.post("/api/metrics", handleMetrics);
 
 // Static files handling
@@ -160,10 +165,12 @@ const startServer = async () => {
   try {
     // Run database migrations in development
     if (config.isDev) {
-      await runMigrations();
-    }
+      await runMigrations();    }
       // Initialize LangSmith
     initLangSmith();
+    
+    // Start scheduler service
+    await schedulerService.start();
     
     httpServer.listen(config.port, () => {
       console.log(`Server running on port ${config.port} in ${config.nodeEnv} mode`);
@@ -179,6 +186,10 @@ startServer();
 // Handle graceful shutdown
 const shutdown = () => {
   console.log("Shutting down gracefully...");
+  
+  // Stop scheduler service
+  schedulerService.stop();
+  
   httpServer.close(() => {
     console.log("HTTP server closed");
     process.exit(0);

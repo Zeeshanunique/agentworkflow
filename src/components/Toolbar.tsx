@@ -1,6 +1,8 @@
 import React from "react";
 import { Save, Play, Plus, Users, Square, Menu } from "lucide-react";
 import { Button } from "./ui/button";
+import WorkflowSettings from "./WorkflowSettings";
+import { TriggerConfig } from "./WorkflowTriggers";
 
 interface ToolbarProps {
   onSave?: () => void;
@@ -9,6 +11,15 @@ interface ToolbarProps {
   isRunning?: boolean;
   isCollaborating?: boolean;
   onToggleSidebar?: () => void;
+  workflowId?: string;
+  workflowName?: string;
+  workflowDescription?: string;
+  currentTrigger?: TriggerConfig;
+  onSettingsSave?: (settings: {
+    name: string;
+    description: string;
+    trigger: TriggerConfig;
+  }) => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
@@ -18,6 +29,11 @@ const Toolbar: React.FC<ToolbarProps> = ({
   isRunning = false,
   isCollaborating = false,
   onToggleSidebar,
+  workflowId,
+  workflowName,
+  workflowDescription,
+  currentTrigger,
+  onSettingsSave,
 }) => {
   return (
     <div className="bg-background border-b border-border py-2 px-4 flex items-center gap-2">
@@ -79,6 +95,15 @@ const Toolbar: React.FC<ToolbarProps> = ({
       )}
 
       <div className="flex-grow"></div>
+
+      <WorkflowSettings
+        workflowId={workflowId}
+        workflowName={workflowName}
+        workflowDescription={workflowDescription}
+        currentTrigger={currentTrigger}
+        onSave={onSettingsSave}
+        className="mr-2"
+      />
 
       {isCollaborating && (
         <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">

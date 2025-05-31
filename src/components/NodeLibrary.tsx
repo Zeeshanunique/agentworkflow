@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { NodeCategory } from "../types";
 import { renderIcon } from "../data/nodeTypes";
+import { renderN8nIcon } from "../data/n8nNodeTypes";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface NodeLibraryProps {
@@ -53,7 +54,7 @@ const NodeLibrary: React.FC<NodeLibraryProps> = ({ categories, onNodeAdd }) => {
                   <span
                     className={`p-1.5 rounded ${node.colorClass} flex items-center justify-center`}
                   >
-                    {renderIcon(node.icon)}
+                    {renderN8nIcon(node.icon) || renderIcon(node.icon)}
                   </span>
                   <div className="flex-1">
                     <span className="block text-sm font-medium">

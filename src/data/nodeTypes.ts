@@ -1,5 +1,53 @@
 import { Port } from '../types/workflow';
-import { LucideIcon, CircleDot, ArrowRight, Code, GitFork, MessageSquare, ShoppingCart, Users, Mail } from 'lucide-react';
+import { NodeIconType } from '../types';
+import { 
+  LucideIcon, 
+  CircleDot, 
+  ArrowRight, 
+  Code, 
+  GitFork, 
+  ShoppingCart, 
+  Users, 
+  Mail,
+  Key,
+  Brain,
+  Image,
+  Share,
+  FileText,
+  MessageSquare,
+  Globe,
+  Webhook,
+  Database,
+  Settings,
+  Clock,
+  Filter,
+  Shuffle,
+  RefreshCw,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  Plus,
+  Minus,
+  Save,
+  Folder,
+  Map,
+  Phone,
+  CreditCard,
+  TrendingUp,
+  Activity,
+  BarChart2,
+  PieChart,
+  Home,
+  Building,
+  Users2,
+  UserCheck,
+  Bell,
+  Book,
+  Bookmark,
+  Tag,
+  Star,
+  Heart
+} from 'lucide-react';
 import { createElement } from 'react';
 
 export interface NodeType {
@@ -258,7 +306,67 @@ export function getAllNodeTypes(): NodeType[] {
   return nodeTypes;
 }
 
-export function renderIcon(icon?: LucideIcon) {
+// Icon mapping for NodeIconType to LucideIcon (partial mapping with fallback)
+const iconMap: Partial<Record<NodeIconType, LucideIcon>> = {
+  key: Key,
+  brain: Brain,
+  image: Image,
+  share: Share,
+  'file-text': FileText,
+  messageSquare: MessageSquare,
+  mail: Mail,
+  globe: Globe,
+  webhook: Webhook,
+  database: Database,
+  settings: Settings,
+  clock: Clock,
+  filter: Filter,
+  shuffle: Shuffle,
+  refresh: RefreshCw,
+  'arrow-up': ArrowUp,
+  'arrow-down': ArrowDown,
+  'arrow-left': ArrowLeft,
+  'arrow-right': ArrowRight,
+  plus: Plus,
+  minus: Minus,
+  save: Save,
+  folder: Folder,
+  map: Map,
+  phone: Phone,
+  'credit-card': CreditCard,
+  'shopping-cart': ShoppingCart,
+  'trending-up': TrendingUp,
+  activity: Activity,
+  'bar-chart-2': BarChart2,
+  'pie-chart': PieChart,
+  home: Home,
+  building: Building,
+  'users-2': Users2,
+  'user-check': UserCheck,
+  bell: Bell,
+  book: Book,
+  bookmark: Bookmark,
+  tag: Tag,
+  star: Star,
+  heart: Heart,
+  users: Users,
+  code: Code
+};
+
+export function renderIcon(icon?: LucideIcon | NodeIconType) {
   if (!icon) return null;
-  return createElement(icon, { size: 16 });
+  
+  // If it's already a LucideIcon component, use it directly
+  if (typeof icon === 'function') {
+    return createElement(icon, { size: 16 });
+  }
+  
+  // If it's a NodeIconType string, map it to the corresponding LucideIcon
+  const IconComponent = iconMap[icon as NodeIconType];
+  if (IconComponent) {
+    return createElement(IconComponent, { size: 16 });
+  }
+  
+  // Fallback to a generic icon
+  return createElement(CircleDot, { size: 16 });
 } 
